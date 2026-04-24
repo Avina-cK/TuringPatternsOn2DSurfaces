@@ -32,6 +32,57 @@ function project_to_surf(x,y,z)
 end
 
 """
+    break_direct_edge!(vertices, triangles, i1, i2) -> (vertices, triangles)
+If vertex indices `i1` and `i2` share one or more triangle edges, split each such
+triangle by inserting a midpoint vertex (projected back onto the implicit surface).
+Returns updated `vertices` (3×N) and `triangles` (3×M) matrices.
+"""
+function break_direct_edge!(vertices, triangles, i1, i2)
+    shared_tris = [t for t in axes(triangles, 2)
+                   if i1 ∈ triangles[:, t] && i2 ∈ triangles[:, t]] 
+    isempty(shared_tris) && return vertices, triangles
+    # Project the midpoint back onto the implicit surface
+    mid_raw = (vertices[:, i1] .+ vertices[:, i2]) ./ 2
+    mid = collect(project_to_surf(mid_raw[1], mid_raw[2], mid_raw[3]))
+    new_idx = size(vertices, 2) + 1
+    vertices = hcat(vertices, mid)
+    # Keep non-shared triangles; split each shared triangle into two
+    kept_mask = trues(size(triangles, 2))
+    kept_mask[shared_tris] .= false
+    new_tris = triangles[:, kept_mask]
+    for t in shared_tris
+        tri = triangles[:, t]
+        other = setdiff(tri, [i1, i2])[1]   # third vertex of this triangle
+        # Each half retains one of the original endpoints and the new midpoint
+        new_tris = hcat(new_tris,
+                        [i1;     new_idx; other],
+                        [new_idx; i2;    other])
+    end
+    return vertices, new_tris
+end
+
+"""
+    edge_length_stats(vertices::Matrix{Float64}, triangles::Matrix{<:Integer}) -> (min_len, max_len)
+"""
+function edge_length_stats(vertices::Matrix{Float64}, triangles::Matrix{<:Integer})
+    max_len = 0.0
+    min_len = Inf
+    for t in eachcol(triangles)
+        a, b, c = t
+        pa, pb, pc = vertices[:, a], vertices[:, b], vertices[:, c]
+        max_len = max(max_len,
+                      norm(pb - pa),
+                      norm(pc - pb),
+                      norm(pa - pc))
+        min_len = min(min_len,
+                      norm(pb - pa),
+                      norm(pc - pb),
+                      norm(pa - pc))
+    end
+    return min_len, max_len
+end
+
+"""
 Lloyd's algorithm
     surface_lloyd(coords, triangles; iterations, fixed_indices)
 - `coords`: 3 x N matrix of vertex coordinates

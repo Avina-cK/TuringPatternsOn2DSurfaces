@@ -16,7 +16,15 @@ constraint_vs = [v1, v2, v3, v4, v5, v6]
 constraint_pts = [collect(project_to_surf(v...)) for v in constraint_vs]
 
 # TODO: create unique name 
-
+"""
+    generate_Dzuik_surface(refinement::Float64 = 0.5; to_constrain::Bool=true, to_lloyd::Bool=true, la_iter::Int=200,)
+        - `refinement`: target edge length for mesh (default: 0.5)
+        optional:
+        - `to_constrain`: whether to snap nearest vertices to constraint points (default: true)
+        - `to_lloyd`: whether to run Lloyd's algorithm to smoothen mesh (default: true)
+        - `la_iter`: number of iterations for Lloyd's algorithm (default: 200)
+    Example usage: generate_Dzuik_surface(0.707; to_constrain=true, to_lloyd=true, la_iter=250)
+"""
 function generate_Dzuik_surface(refinement::Float64 = 0.5; to_constrain::Bool=true, to_lloyd::Bool=true, la_iter::Int=200,)
     
     #--- initialise gmsh model --------------------#
@@ -66,6 +74,9 @@ function generate_Dzuik_surface(refinement::Float64 = 0.5; to_constrain::Bool=tr
         unique!(fixed_indices)
         idx_v1, idx_v2 = fixed_indices[1], fixed_indices[2]
         vertices, triangles = break_direct_edge!(vertices, triangles, idx_v1, idx_v2)
+        constrained="Constrained"
+    else
+        constrained=""
     end
 
     min_edge_length_before, max_edge_length_before = edge_length_stats(vertices, triangles)
@@ -83,7 +94,7 @@ function generate_Dzuik_surface(refinement::Float64 = 0.5; to_constrain::Bool=tr
     else
         lloyded="notlloyded"
     end
-    
+
     #--- clear whatever is in gmsh -------------------------#
     gmsh.model.removeEntities(gmsh.model.getEntities(), true)
     gmsh.model.mesh.clear()
@@ -109,9 +120,12 @@ function generate_Dzuik_surface(refinement::Float64 = 0.5; to_constrain::Bool=tr
         [collect(1:N_t)], #unique id numbers for triangles
         [vec(triangles)] 
     )
-
+    result_folder= "results/SurfaceMeshes/"
+        if !isdir(result_folder)
+            mkdir(result_folder)
+        end
     #--- Write mesh into file ------#
-    gmsh.write("Constrained_"*modelname*"_"*lloyded*".msh")
+    gmsh.write(result_folder*constrained*modelname*"_"*lloyded*".msh")
     #--- Close gmsh -----#
     gmsh.finalize()
 end
