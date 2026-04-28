@@ -49,16 +49,7 @@ WORK IN PROGRESS
         <li><a href="#built-with">Built With</a></li>
       </ul>
     </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
@@ -78,6 +69,8 @@ An investigation of turing patterns on (no-boundary, smooth) 2D manifolds (in 3D
 ### Built With
 
 * [![Julia][Julia-shield]][Julia-url]
+  *  [Ferrite.jl](https://ferrite-fem.github.io/Ferrite.jl/stable/)
+  *  [Symbolics.jl](https://github.com/JuliaSymbolics/Symbolics.jl)
 * [![Gmsh][Gmsh-url]]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -122,10 +115,8 @@ _Below is an example of how you can instruct your audience on installing and set
    git remote set-url origin github_username/repo_name
    git remote -v # confirm the changes
    ```
--->
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
+-->
 
 <!-- USAGE EXAMPLES -->
 <!--
@@ -201,16 +192,8 @@ Gerhard Dziuk. Finite Elements for the Beltrami operator on arbitrary surfaces, 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
-
 * [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
-* [Malven's Grid Cheatsheet](https://grid.malven.co/)
 * [Img Shields](https://shields.io)
-* [GitHub Pages](https://pages.github.com)
-* [Font Awesome](https://fontawesome.com)
-* [React Icons](https://react-icons.github.io/react-icons/search)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -221,8 +204,8 @@ Use this space to list resources you find helpful and would like to give credit 
 
 [license-shield]: https://img.shields.io/badge/License-AGPL_v3-blue.svg
 [license-url]: https://www.gnu.org/licenses/agpl-3.0
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg
 [linkedin-url]: https://www.linkedin.com/in/avina-chetana-kalle-a01a8022a/
 [Julia-url]: https://julialang.org/
-[Julia-shield]: https://img.shields.io/badge/-Julia-9558B2?style=for-the-badge&logo=julia&logoColor=white
+[Julia-shield]: https://img.shields.io/badge/Julia-9558B2.svg?logo=Julia&logoColor=white
 [Gmsh-url]: https://gmsh.info/
