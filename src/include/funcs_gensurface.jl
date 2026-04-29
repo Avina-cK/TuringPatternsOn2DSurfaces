@@ -55,8 +55,8 @@ function break_direct_edge!(vertices, triangles, i1, i2)
         other = setdiff(tri, [i1, i2])[1]   # third vertex of this triangle
         # Each half retains one of the original endpoints and the new midpoint
         new_tris = hcat(new_tris,
-                        [i1;     new_idx; other],
-                        [new_idx; i2;    other])
+                        [i1; new_idx; other],
+                        [new_idx; i2; other])
     end
     return vertices, new_tris
 end

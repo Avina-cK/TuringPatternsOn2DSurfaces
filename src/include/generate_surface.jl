@@ -44,7 +44,7 @@ function generate_Dzuik_surface(refinement::Float64 = 0.5; to_constrain::Bool=tr
     #--- Generate spherical mesh ----------------------#
     gmsh.model.mesh.generate(2) # generate mesh of dim=2
 
-    node_tags, node_coords,  = gmsh.model.mesh.getNodes()
+    node_tags, node_coords, = gmsh.model.mesh.getNodes()
     vertices = reshape(node_coords, 3, :)
 
     #--- Project all vertices to implicit surface ----------------------#
@@ -78,19 +78,20 @@ function generate_Dzuik_surface(refinement::Float64 = 0.5; to_constrain::Bool=tr
     else
         constrained=""
     end
-
+    #=
     min_edge_length_before, max_edge_length_before = edge_length_stats(vertices, triangles)
     println("Min edge length before Lloyd's algorithm: ", min_edge_length_before)
     println("Max edge length before Lloyd's algorithm: ", max_edge_length_before)
-
+    =#
     if to_lloyd
         lloyded="lloyded"
         #--- Run Lloyd's algorithm to smoothen mesh ----------------------#
         vertices, triangles = surface_lloyd(vertices, triangles; iterations=la_iter,  fixed_indices = fixed_indices,)
-        
+        #=
         min_edge_length_after, max_edge_length_after = edge_length_stats(vertices, triangles)
         println("Min edge length after Lloyd's algorithm: ", min_edge_length_after)
         println("Max edge length after Lloyd's algorithm: ", max_edge_length_after)
+        =#
     else
         lloyded="notlloyded"
     end
@@ -120,9 +121,9 @@ function generate_Dzuik_surface(refinement::Float64 = 0.5; to_constrain::Bool=tr
         [collect(1:N_t)], #unique id numbers for triangles
         [vec(triangles)] 
     )
-    result_folder= "results/SurfaceMeshes/"
+    result_folder= "../results/SurfaceMeshes/"
         if !isdir(result_folder)
-            mkdir(result_folder)
+            mkpath(result_folder)
         end
     #--- Write mesh into file ------#
     gmsh.write(result_folder*constrained*modelname*"_"*lloyded*".msh")
