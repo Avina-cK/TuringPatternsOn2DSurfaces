@@ -21,7 +21,7 @@ Computes the discrete version of the square of the $L^2$ error of a function, $u
 ```
 
 ## funcs_gensurface.jl
-Defines six functions used to generate the Dziuk implicit surface mesh, given by $\left{ (x_1, x_2, x_3):d_S(x_1, x_2, x_3)=0 \right}$.
+Defines six functions used to generate the Dziuk implicit surface mesh, given by { $(x_1, x_2, x_3):d_S(x_1, x_2, x_3)=0$ }.
 1. `Dziuk_surface(x,y,z)`
 ```math
 d_S (x,y,z) = z^2 + y^2 + (x - z^2)^2 - 1.0
