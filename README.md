@@ -49,6 +49,7 @@ WORK IN PROGRESS
         <li><a href="#built-with">Built With</a></li>
       </ul>
     </li>
+    <li><a href="#progress">Progress so far</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -73,6 +74,19 @@ An investigation of turing patterns on (no-boundary, smooth) 2D manifolds (in 3D
   *  [Symbolics.jl](https://github.com/JuliaSymbolics/Symbolics.jl)
 * [![Gmsh][Gmsh-url]]
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- ROADMAP -->
+## Progress so far
+
+- Solved stationary heat equation on Dziuk surface.
+- Created refined meshes, using a manually initial mesh.
+  - [function to generate meshes](https://github.com/Avina-cK/TuringPatternsOn2DSurfaces/blob/main/src/include/gen_lowresmesh_from0.jl)
+  - [.msh files](https://github.com/Avina-cK/TuringPatternsOn2DSurfaces/tree/main/src/Dziuk_surf_meshes) 
+
+<!--
+See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
+-->
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
@@ -131,10 +145,10 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 -->
 
 <!-- ROADMAP -->
-## Roadmap
+## Next Steps
 
-- [ ] Add Changelog
-- [ ] Add Roadmap
+- [ ] Add Changelog 
+- [ ] Update documentation on simulating heat equation on Dziuk surface
 
 <!--
 See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
@@ -194,6 +208,7 @@ Gerhard Dziuk. Finite Elements for the Beltrami operator on arbitrary surfaces, 
 
 * [Choose an Open Source License](https://choosealicense.com)
 * [Img Shields](https://shields.io)
+* Alan Turing
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
