@@ -1,5 +1,5 @@
 #=
-Source:
+Source for surface function:
 Gerhard Dziuk. Finite Elements for the Beltrami operator on arbitrary surfaces, 
 pages 142–155. Springer Berlin Heidelberg, Berlin, Heidelberg, 1988.
 =#
@@ -29,6 +29,18 @@ function project_to_surf(x,y,z)
         pz -= d_ist/norm_gₛ * gz
     end
     return px,py,pz
+end
+
+function project_allvertices!(verts; max_itersg::Int=100, tolg::Float64=1e-10)
+    n = length(verts) ÷ 3
+    for i in 1:n
+        idx = 3*(i-1)
+        px = verts[idx + 1]
+        py = verts[idx + 2]
+        pz = verts[idx + 3]
+        verts[idx + 1], verts[idx + 2], verts[idx + 3] = project_to_surf(px,py,pz; max_iters=max_itersg, tol=tolg)
+    end
+    return nothing
 end
 
 """
@@ -81,6 +93,29 @@ function edge_length_stats(vertices::Matrix{Float64}, triangles::Matrix{<:Intege
     end
     return min_len, max_len
 end
+function edge_length_stats2(node_tags, coords, etypes, enodes)
+    n = length(coords) ÷ 3
+    V = reshape(coords, 3, n)
+    tag2idx = Dict(tag => i for (i, tag) in enumerate(node_tags))
+    T = extract_triangles(etypes, enodes)
+    min_len = Inf
+    max_len = 0.0
+    for t in eachcol(T)
+        a, b, c = t
+        pa = V[:, tag2idx[a]]
+        pb = V[:, tag2idx[b]]
+        pc = V[:, tag2idx[c]]
+        max_len = max(max_len,
+                      norm(pb - pa),
+                      norm(pc - pb),
+                      norm(pa - pc))
+        min_len = min(min_len,
+                      norm(pb - pa),
+                      norm(pc - pb),
+                      norm(pa - pc))
+    end
+    return min_len, max_len
+end
 
 """
 Lloyd's algorithm
@@ -90,13 +125,23 @@ Lloyd's algorithm
 - `iterations`: number of Lloyd iterations to perform (default: 50)
 - `fixed_indices`: vector of vertex indices to keep fixed during iterations (default: empty)
 """
-function surface_lloyd(coords, triangles; iterations=50, fixed_indices=Int[])
-    # convert coordinate matrix into a vector
+function surface_lloyd(coords, triangles; iterations=50, fixed_indices=Int[], repel::Bool=false, ϵ=1e-15, λₗ=0.0001)
     pts = [coords[:, i] for i in axes(coords, 2)]
     fixed_set = Set(fixed_indices)
+    n = length(pts)
+    adj = [Int[] for _ in 1:n]
+
+    for t in eachcol(triangles)
+        a,b,c = t
+        push!(adj[a], b); push!(adj[a], c)
+        push!(adj[b], a); push!(adj[b], c)
+        push!(adj[c], a); push!(adj[c], b)
+    end
+
     for _ in 1:iterations
-        mass = zeros(length(pts))
-        centroid = [zeros(3) for _ in 1:length(pts)]
+        mass = zeros(n)
+        centroid = [zeros(3) for _ in 1:n]
+
         for t in eachcol(triangles)
             a,b,c = t
             #coordinates of triangle's vertices
@@ -113,20 +158,42 @@ function surface_lloyd(coords, triangles; iterations=50, fixed_indices=Int[])
                 mass[v] += area
             end
         end
-        for i in eachindex(pts)
+
+        for i in 1:n
             # ignore fixed vertices
             i in fixed_set && continue
-            #ensure no division by 0
+            # ensure no division by 0
             mass[i] == 0 && continue
-            #new vertex is computed as an area-weighted centroid
+            # new vertex is computed as an area-weighted centroid
             newp = centroid[i] / mass[i]
-            #project to implicit surface
+            # project to implicit surface
             px,py,pz = project_to_surf(newp...)
-            #updates pts vector
+            # updates pts vector
             pts[i] .= (px,py,pz)
         end
+
+        if repel
+            # move points that are too closed to each other
+            for i in 1:n
+                i in fixed_set && continue
+                move = zeros(3)
+                for j in adj[i]
+                    diff = pts[i] - pts[j]
+                    dist2= dot(diff,diff) + ϵ
+                    move .+= diff ./ dist2
+                end
+                pts[i] .+= λₗ * move
+            end
+            
+            # project to implicit surface
+            for i in 1:n
+                i in fixed_set && continue    
+                px,py,pz = project_to_surf(pts[i]...)
+                pts[i] .= (px,py,pz)
+            end
+        end
     end
-    #reshape vertex list appropriately
+    # reshape vertex list appropriately
     newcoords = hcat(pts...)
     return newcoords, triangles
 end
