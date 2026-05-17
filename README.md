@@ -76,11 +76,10 @@ An investigation of turing patterns on (no-boundary, smooth) 2D manifolds (in 3D
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- ROADMAP -->
+<!-- PROGRESS -->
 ## Progress so far
-
-- Solved stationary heat equation on Dziuk surface.
-- Created refined meshes, using a manually initial mesh.
+- Solved stationary heat equation on Dziuk surface. (See [02_heateq_on_dziuksurf](https://github.com/Avina-cK/TuringPatternsOn2DSurfaces/tree/main/src/prelim_tests/02_heateq_on_dziuksurf))
+- Created refined meshes, using a manually initial mesh (4nodes-8triangles).
   - [function to generate meshes](https://github.com/Avina-cK/TuringPatternsOn2DSurfaces/blob/main/src/include/gen_lowresmesh_from0.jl)
   - [.msh files](https://github.com/Avina-cK/TuringPatternsOn2DSurfaces/tree/main/src/Dziuk_surf_meshes) 
 
