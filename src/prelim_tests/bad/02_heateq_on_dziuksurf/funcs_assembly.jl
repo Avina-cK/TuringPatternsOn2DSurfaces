@@ -53,7 +53,7 @@ function assemble_elementK!(Ke::Matrix, cellvalues::CellValues)
     return Ke
 end
 
-function assemble_globalK(cellvalues::CellValues, Kₕ::SparseMatrixCSC, dh::DofHandler)
+function assemble_globalK(Kₕ::SparseMatrixCSC, cellvalues::CellValues, dh::DofHandler)
     n_base_funcs = getnbasefunctions(cellvalues);
     # Initiate element stiffness matrix and element force vector
     Ke = zeros(n_base_funcs, n_base_funcs);

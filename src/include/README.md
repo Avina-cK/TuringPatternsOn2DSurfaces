@@ -41,3 +41,18 @@ d_S (x,y,z) = z^2 + y^2 + (x - z^2)^2 - 1.0
 v_i^{new} = \frac{1}{\sum_j{A_j}} \cdot \sum_j {A_j \cdot c_j}
 ```
 where $j$ is runs over all triangles touching $v_i$.
+
+## sym_funcs.jl
+Uses the Symbolics library to compile Julia functions that defines the following, given a function $d(x,y,z)$ (that describes a surface, $S=\{x \in \mathbb{R}^3 : d(x)=0\}$) and a function $u(x,y,z)$:
+1. `normal_atpt(d::Function) -> n(x,y,z)::Function`: Generates a function that describes the normal to the surface $S$.
+ ```math
+ n = \frac{\nabla d}{|\nabla d|}
+ ```
+2. `∇ₛ(u::Function, d::Function) -> ∇ₛu(x,y,z)::Function`: Generates the tangential gradient, w.r.t the surface $S$, of a function $u$.
+```math
+\nabla _S (u) = \nabla u - ( \nabla u \cdot n ) n, \quad  n = \frac{\nabla d}{|\nabla d|}
+```
+3. `Δₛ(u::Function, d::Function) -> Δₛu(x,y,z)::Function`: Generates the Laplace-Beltrami operator, w.r.t the surface $S$, of a function $u$.
+```math
+\Delta _S (u) = \nabla _S \cdot \nabla _S (u) 
+```

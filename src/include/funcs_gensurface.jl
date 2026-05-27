@@ -1,20 +1,3 @@
-#=
-Source for surface function:
-Gerhard Dziuk. Finite Elements for the Beltrami operator on arbitrary surfaces, 
-pages 142–155. Springer Berlin Heidelberg, Berlin, Heidelberg, 1988.
-=#
-
-function Dziuk_surface(x,y,z)
-    z^2 + y^2 + (x - z^2)^2 - 1.0
-end
-
-function gradDziuk_surface(x,y,z)
-    gx = 2.0 *(x - z^2)
-    gy = (2.0 *y)
-    gz = 2.0 *z - (4.0 *z*(x - (z^2)))
-    gx,gy,gz
-end
-
 function project_to_surf(x,y,z)
     px,py,pz = x,y,z
     for _ in 1:100

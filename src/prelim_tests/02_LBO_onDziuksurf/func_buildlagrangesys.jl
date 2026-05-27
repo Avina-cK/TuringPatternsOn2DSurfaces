@@ -1,0 +1,36 @@
+"""
+    build_lagrange_system(Kₕ, F, C) → (A, b)
+
+Assemble the (n+1) × (n+1) saddle-point system from:
+  - Kₕ :: SparseMatrixCSC{Float64}  stiffness matrix (n × n)
+  - F  :: Vector{Float64}            RHS force vector (n)
+  - C  :: Vector{Float64}            constraint row (n), i.e. C[j] = ∫φ_j dΩ
+
+Returns a dense augmented system A and RHS b.
+"""
+function build_lagrange_system(
+    Kₕ::AbstractMatrix{Float64},   # n × n
+    F::AbstractVector{Float64},   # n
+    C::AbstractVector{Float64}    # n  (row vector stored as 1D array)
+)
+    n  = length(F)
+    @assert size(Kₕ) == (n, n) "K_h must be n × n"
+    @assert length(C) == n "C must have length n"
+
+    # -- Augmented matrix A ∈ ℝ^(n+1 × n+1) -------------------------#
+    #   A = [ K_h   C ]   <- last column is Cᵀ (stored as column)
+    #       [  Cᵀ   0 ]   <- last row is C, bottom-right is 0
+    A = zeros(n + 1, n + 1)
+    A[1:n, 1:n] .= Kₕ
+    A[1:n, n+1]  = C
+    A[n+1, 1:n]  = C
+    A[n+1, n+1]  = 0.0
+
+    # -- Augmented RHS b ∈ ℝ^(n+1) ------------------------------------#
+    #   b = [ F; 0 ]
+    b = zeros(n + 1)
+    b[1:n] = F
+    b[n+1] = 0.0
+
+    return A, b
+end

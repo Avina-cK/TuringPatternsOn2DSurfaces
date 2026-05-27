@@ -33,41 +33,74 @@ function edge_length_stats2(node_tags, coords, etypes, enodes)
     return min_len, max_len
 end
 
+function signed_area(pa, pb, pc)
+    x1, y1 = pa[1], pa[2]
+    x2, y2 = pb[1], pb[2]
+    x3, y3 = pc[1], pc[2]
+
+    return 0.5 * (
+        (x2 - x1)*(y3 - y1) -
+        (x3 - x1)*(y2 - y1)
+    )
+end
+
 function load_mesh(filename::String)
+    gmsh.isInitialized()!=0 && gmsh.finalize()
         # -- Open the mesh ----#
         gmsh.initialize()
+    try
         gmsh.open(filename)
 
         # --- Extract node coordinates and tags---#
-        node_tags, node_coords, _ = gmsh.model.mesh.getNodes()
+        node_tags, node_coords, _ = gmsh.model.mesh.getNodes(2)
 
-        # Map gmsh node-tag -> contiguous 1-based index
-        id_map = Dict(id => i for (i, id) in enumerate(node_tags))
+        n_nodes = length(node_tags)
 
-        nodes = [Ferrite.Node(Vec{3,Float64}((node_coords[3i-2], node_coords[3i-1], node_coords[3i])))
-            for i in 1:length(node_tags)]
+        # Gmsh node tag -> contiguous Ferrite index
+        id_map = Dict(tag => i for (i, tag) in enumerate(node_tags))
+
+        nodes = [
+            Ferrite.Node(Vec{3,Float64}((
+                node_coords[3i-2],
+                node_coords[3i-1],
+                node_coords[3i]
+            )))
+            for i in 1:n_nodes
+        ]
+
 
         # --- Extract element coordinates and tags---#
-        etypes, _, ntags = gmsh.model.mesh.getElements(2)
-        min_edge_length, max_edge_length = edge_length_stats2(node_tags, node_coords, etypes, ntags)
+        etypes, _, enodes = gmsh.model.mesh.getElements(2)
+        min_edge_length, max_edge_length = edge_length_stats2(node_tags, node_coords, etypes, enodes)
 
         tri_idx = findfirst(==(2), etypes)
         tri_idx === nothing && error("No triangle elements found.")
-
-        tri_ntags = ntags[tri_idx]
-        n_cells = length(tri_ntags) ÷ 3
-
+        tri_ntags = enodes[tri_idx]
+        n_cells   = length(tri_ntags) ÷ 3
+        @assert length(tri_ntags) % 3 == 0 "Triangle node tag count not divisible by 3"
+        
+        cells = Ferrite.Triangle[]
         cells = [
-                Ferrite.Triangle((
+            Ferrite.Triangle((
                 id_map[tri_ntags[3i-2]],
                 id_map[tri_ntags[3i-1]],
                 id_map[tri_ntags[3i]]
-                ))
-                for i in 1:n_cells
+            ))
+            for i in 1:n_cells
         ]
-        gmsh.finalize()
 
+        # Validate all cell node indices are in range
+        n_nodes = length(nodes)
+        for (ci, cell) in enumerate(cells)
+            for nidx in cell.nodes
+                1 ≤ nidx ≤ n_nodes ||
+                    error("Cell $ci references out-of-range node index $nidx")
+            end
+        end
         # -- Build the Ferrite grid ---#
         Ωₕ = Ferrite.Grid(cells, nodes)
         return Ωₕ, max_edge_length
+    finally
+        gmsh.isInitialized()!=0 && gmsh.finalize()
+    end
 end
