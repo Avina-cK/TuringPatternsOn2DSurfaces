@@ -32,12 +32,12 @@ function J_Φ(cell_nodes::Vector{Vec{3, Float64}})
     dN₃dξ = Vec{2, Float64}((-1.0, -1.0))    
 
     # coordinates of nodes
-    q1 = cell_nodes[1]
-    q2 = cell_nodes[2]
-    q3 = cell_nodes[3]
+    q1 = cell_nodes[1][1:3]
+    q2 = cell_nodes[2][1:3]
+    q3 = cell_nodes[3][1:3]
 
     # Jacobian matrix ∈ ℝ³ˣ²
-    J = zeros(3,2)
+    J = Matrix(zeros(3,2))
     J[:,1] = dN₁dξ[1]*q1 + dN₂dξ[1]*q2 + dN₃dξ[1]*q3
     J[:,2] = dN₁dξ[2]*q1 + dN₂dξ[2]*q2 + dN₃dξ[2]*q3
 
@@ -77,7 +77,7 @@ the first fundamental form G = Jᵀ J ∈ ℝ²ˣ² instead of a square inverse.
 struct SurfaceMapping end
 
 #--- Required(?): tell Ferrite which mapping LTI uses -----------#
-#Ferrite.mapping_type(::LTI) = SurfaceMapping()
+Ferrite.mapping_type(::LTI) = SurfaceMapping()
 
 # Mapping Values Container
 # Precomputed at each quadrature point during reinit!

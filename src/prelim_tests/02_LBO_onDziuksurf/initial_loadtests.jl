@@ -1,7 +1,9 @@
-using Ferrite
+using Ferrite, Tensors
+include("setup_surface.jl")
 
+## Load mesh
 include("../../include/func_loadmesh.jl")
-refinement = 3
+refinement = 1
 filename = "lowresmesh_$(refinement).msh"
 cd(@__DIR__)
 cd("../../Dziuk_surf_meshes/")
@@ -9,25 +11,27 @@ cd("../../Dziuk_surf_meshes/")
 @info "Grid imported for refinement level $refinement"
 cd(@__DIR__)
 #= Ωₕ.nodes; Ωₕ.cells =#
-include("custom_interpolation.jl")
-include("custom_geomapping.jl")
-qr = QuadratureRule{RefTriangle}(2)
+
+##
+#qr = QuadratureRule{RefTriangle}(1)
 ip = LTI()
-#cellvalues_Ω = CellValues(qr, ip, ip^3)
+cellvalues_Ω = setup_surface_cellvalues(Ωₕ)
 
 dh = DofHandler(Ωₕ)
 add!(dh, :u, ip)
 close!(dh)
-n_dofs = ndofs(dh)
-include("func_assembleK.jl")
-Kₕ = assemble_globalK_surface(dh, qr, ip)
 
+n_dofs = ndofs(dh)
+include("func_assembleKF.jl")
 F = zeros(n_dofs)
 include("manufactured_sol.jl")
-include("func_assembleRHS.jl")
-assemble_rhs_forces!(F, dh, qr, ip, rhs_func)
 
-include("func_assembleconstraintC.jl")
+Kₕ, F = assemble_globalKF(F, dh, cellvalues_Ω, rhs_func)
+
+## TODO
+
+#=
+#include("func_assembleconstraintC.jl")
 C = zeros(n_dofs)
 assemble_constraint_C!(C, dh, qr, ip)
 
@@ -47,3 +51,4 @@ u_true_centered = u_true_vec .- mean_u_true
 include("func_L2_norm.jl")
 l2_err  = L₂_error(u_true_centered, u_h, dh, qr, ip)
 #l2_true = L2_norm(u_true_centered, dh, qr, ip)
+=#

@@ -24,7 +24,7 @@ Face numbers:   | Face identifiers:
     +-------+   |
 ----------------+--------------------
 =#
-
+#using Ferrite
 struct LTI <: ScalarInterpolation{RefTriangle, 1}
 end
 
@@ -47,19 +47,19 @@ end
 
 Ferrite.vertexdof_indices(::LTI) = ((1,), (2,), (3,))
 
-# Edge interior DOFs - linear triangle has no edge-interior DOFs
+# Edge interior DOFs : linear triangle has no edge-interior DOFs
 Ferrite.edgedof_interior_indices(::LTI) = ((), (), ())
 
 # All edge DOFs (including vertices)
 Ferrite.edgedof_indices(::LTI) = ((1, 2,), (2, 3,), (3, 1,))
 
-# Face interior DOFs - no face-interior DOFs for linear triangle
+# Face interior DOFs : no face-interior DOFs for linear triangle
 Ferrite.facedof_interior_indices(::LTI) = ((),)
 
 # All face DOFs (including vertices and edges)
 Ferrite.facedof_indices(::LTI) = ((1, 2, 3),)
 
-# Volume interior DOFs - none for 2D element
+# Volume interior DOFs : none for 2D element
 Ferrite.volumedof_interior_indices(::LTI) = ()
 
 # Total number of base functions
@@ -68,17 +68,17 @@ Ferrite.getnbasefunctions(::LTI) = 3
 # No need to adjust DOFs during distribution for linear elements
 Ferrite.adjust_dofs_during_distribution(::LTI) = false
 
-# Conformity - continuous function values across cell borders
+# Conformity : H1, aka continuous function values across cell borders
 Ferrite.conformity(::LTI) = Ferrite.H1Conformity()
 
-# shape gradients
+#= shape gradients
 function Ferrite.reference_shape_gradient(ip::LTI, ξ::Vec{2}, shape_number::Int)
     shape_number == 1 && return Vec{2, Float64}((1.0, 0.0))
     shape_number == 2 && return Vec{2, Float64}((0.0, 1.0))
     shape_number == 3 && return Vec{2, Float64}((-1.0, -1.0))
     throw(ArgumentError("no shape function $shape_number for interpolation $ip"))
 end
-
+=#
 
 ## Tests
 #=
