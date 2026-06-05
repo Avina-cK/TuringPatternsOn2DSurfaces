@@ -6,10 +6,10 @@ using Ferrite
 Dziuk surface: z^2 + y^2 + (x - z^2)^2 - 1.0 = 0
 This script manually creates a 6-node 8-triangle mesh of a surface, and then refines it `ref` times.
 =#
-
+include("func_DzuikSurface.jl")
 include("funcs_gensurface.jl")
 
-function gensurfmesh_from0(ref::Int=0)
+function gensurfmesh_from0(ref::Int=0; λᵧ=0.0001)
 
     # initial surface has 6 points:
     vertices0 = [
@@ -72,8 +72,9 @@ function gensurfmesh_from0(ref::Int=0)
             gmsh.model.mesh.refine()
 
             node_tags, node_coords, _ = gmsh.model.mesh.getNodes()
-            etypes, _, enodes = gmsh.model.mesh.getElements()
-            tri = enodes[findfirst(==(2), etypes)]
+            etypes, _, enodes = gmsh.model.mesh.getElements(2, surf_tag)
+            tri_idx = findfirst(t -> t in (2, 9), etypes)
+            tri = enodes[tri_idx]
             triangles = reshape(tri, 3, :)
 
             # Project all vertices to the implicit surface
@@ -81,7 +82,8 @@ function gensurfmesh_from0(ref::Int=0)
 
             # apply Lloyd's algorithm to smooth the mesh
             vertices = reshape(node_coords, 3, :)
-            vertices, triangles = surface_lloyd(vertices, triangles; iterations = 50, repel=true)
+            #if λᵧ>10^(-j) λᵧ=10^(-j) end
+            vertices, triangles = surface_lloyd(vertices, triangles; iterations = 50, repel=true, λₗ=λᵧ)
 
             # update the node coordinates in the gmsh model 
             node_coords .= vec(vertices)

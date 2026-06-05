@@ -20,17 +20,12 @@ function build_lagrange_system(
     # -- Augmented matrix A ∈ ℝ^(n+1 × n+1) -------------------------#
     #   A = [ K_h   C ]   <- last column is Cᵀ (stored as column)
     #       [  Cᵀ   0 ]   <- last row is C, bottom-right is 0
-    A = zeros(n + 1, n + 1)
-    A[1:n, 1:n] .= Kₕ
-    A[1:n, n+1]  = C
-    A[n+1, 1:n]  = C
-    A[n+1, n+1]  = 0.0
+    C_col = sparse(C)
+    A = [Kₕ        C_col        ;
+         transpose(C_col) sparse([0.0])]
 
     # -- Augmented RHS b ∈ ℝ^(n+1) ------------------------------------#
     #   b = [ F; 0 ]
-    b = zeros(n + 1)
-    b[1:n] = F
-    b[n+1] = 0.0
-
+    b = [F; 0.0]
     return A, b
 end

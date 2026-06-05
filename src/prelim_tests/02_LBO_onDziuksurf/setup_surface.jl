@@ -1,4 +1,29 @@
 using Ferrite, Tensors
+#=
+----------------+--------------------
+Vertex numbers: | Vertex coordinates:
+    2           |
+    | \         | v1: 𝛏 = (1.0, 0.0)
+    |   \       | v2: 𝛏 = (0.0, 1.0)
+ξ₂^ |     \     | v3: 𝛏 = (0.0, 0.0)
+  | 3-------1   |
+  +--> ξ₁       |
+----------------+--------------------
+Edge numbers:   | Edge identifiers:
+    +           |
+    | \         | e1: (v1, v2)
+    2   1       | e2: (v2, v3)
+    |     \     | e3: (v3, v1)
+    +---3---+   |
+----------------+--------------------
+Face numbers:   | Face identifiers:
+    +           |
+    | \         |
+    |   \       | f1: (v1, v2, v3)
+    |  1  \     |
+    +-------+   |
+----------------+--------------------
+=#
 
 ## Helper functions
 """
@@ -295,7 +320,7 @@ Cell values for a scalar field defined on a surface (2-D triangle embedded in �
 abstract type AbstractSurfaceValues end
 struct SurfaceCellValues{T <: AbstractFloat,
                          QR <: QuadratureRule{RefTriangle},
-                         IP
+                         IP <: Lagrange{RefTriangle},
                         } <: AbstractSurfaceValues
     N_ref :: Matrix{T}
     ∇N_ref :: Matrix{Vec{2,T}}
@@ -367,17 +392,18 @@ function Ferrite.reinit!(
         cv        :: SurfaceCellValues{T},
         cellnodes :: AbstractVector{<:Vec{3}}
     ) where {T}
- 
+
     nodes  = collect(Vec{3,T}, cellnodes)
     no_bfs = Ferrite.getnbasefunctions(cv)
- 
+
+    reinit!(cv.mapping, nodes)  # -> populate Jmat, Jtens, detJ, invG, x
+
     for (q, (ξ, w)) in enumerate(zip(Ferrite.getpoints(cv.qr), Ferrite.getweights(cv.qr)))
- 
-        mv = compute_surface_mapping(nodes, ξ) # SurfaceMappingValues{T}
-        cv.detJdV[q] = mv.detJ * T(w) # √det(G) · w_q
-        cv.mapping.x[q]   = getspatialcoord(cv.mapping.ip, ξ, nodes)
+        mv = compute_surface_mapping(nodes, ξ)
+        cv.detJdV[q] = mv.detJ * T(w)
+        # cv.mapping.x[q] now set by reinit!(cv.mapping, ...) above — no need to repeat
         for i in 1:no_bfs
-            cv.N_surf[i, q]  = cv.N_ref[i, q] 
+            cv.N_surf[i, q]  = cv.N_ref[i, q]
             cv.∇N_surf[i, q] = map_shape_gradient(cv.mapping, cv.∇N_ref[i, q], mv)
         end
     end
@@ -413,6 +439,7 @@ function setup_surface_cellvalues(grid::Ferrite.Grid{3, Triangle, Float64})
     Ferrite.reinit!(cv, cell1_nodes)
  
     println("\nCell 1 spot-check (q=1):")
+    println("Cell 1 nodes: ", cell1_nodes)
     println("  detJdV[1]    = ", cv.detJdV[1])
     println("  N_surf[:,1]  = ", cv.N_surf[:, 1])
     println("  ∇N_surf[1,1] = ", cv.∇N_surf[1, 1],
@@ -420,12 +447,24 @@ function setup_surface_cellvalues(grid::Ferrite.Grid{3, Triangle, Float64})
     println("  ∇N_surf[2,1] = ", cv.∇N_surf[2, 1])
     println("  ∇N_surf[3,1] = ", cv.∇N_surf[3, 1])
  
-    # -- partition-of-unity check: ∑ N_surf[i,q] == 1 for all q ----------
+    #= -- partition-of-unity check: ∑ N_surf[i,q] == 1 for all q ----------
     for q in 1:Ferrite.getnquadpoints(cv)
         s = sum(cv.N_surf[i,q] for i in 1:Ferrite.getnbasefunctions(cv))
         @assert isapprox(s, 1.0; atol=1e-12) "PoU failed at q=$q: ∑Nᵢ = $s"
     end
-    println("\n  Partition-of-unity check passed ✓")
- 
+    println("\n  Partition-of-unity check passed Y")
+    =#
     return cv
 end
+
+## checking normal orientation
+#=
+inward = 0
+for cell in CellIterator(Ωₕ)
+    Ferrite.reinit!(cellvalues_Ω, cell)
+    n = surface_normal(cellvalues_Ω.mapping, 1)
+    x = cellvalues_Ω.mapping.x[1]
+    dot(n, x) < 0 && (inward += 1)
+end
+println("Inward normals: $inward / $(getncells(Ωₕ))")
+=#

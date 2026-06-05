@@ -8,7 +8,9 @@ Pkg.add([
     "NaNMath",
     "Plots",
     "RuntimeGeneratedFunctions",
-    "Symbolics"
+    "SparseArrays",
+    "Symbolics",
+    "Tensors"
     ])
 
 read("Project.toml", String)

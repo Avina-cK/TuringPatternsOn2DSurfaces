@@ -1,7 +1,7 @@
 function assemble_elementKF!(
     Kₑ::Matrix, fₑ::Vector,
     cv::SurfaceCellValues,
-    cell_coords, func_rhs::Function
+    func_rhs::Function
     )
 
     no_bfs = getnbasefunctions(cv)
@@ -39,8 +39,7 @@ function assemble_globalKF(F::AbstractVector, dh::DofHandler, cv::SurfaceCellVal
 
     for cell in CellIterator(dh)
         Ferrite.reinit!(cv, cell)
-        cell_coords = getcoordinates(cell)
-        assemble_elementKF!(Kₑ, fₑ, cv, cell_coords, func_rhs_g)
+        assemble_elementKF!(Kₑ, fₑ, cv, func_rhs_g)
         assemble!(assembler, celldofs(cell), Kₑ, fₑ)
     end
     return Kₕ, F

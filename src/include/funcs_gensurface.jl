@@ -1,8 +1,8 @@
-function project_to_surf(x,y,z)
+function project_to_surf(x,y,z; max_iters=100, tol=1e-10)
     px,py,pz = x,y,z
-    for _ in 1:100
+    for _ in 1:max_iters
         d_ist = Dziuk_surface(px,py,pz)
-        if abs(d_ist) < 1e-10 
+        if abs(d_ist) < tol
             break 
         end
         gx,gy,gz = gradDziuk_surface(px,py,pz)
@@ -25,6 +25,16 @@ function project_allvertices!(verts; max_itersg::Int=100, tolg::Float64=1e-10)
     end
     return nothing
 end
+
+function extract_triangles(etypes, enodes)
+    for (i, t) in enumerate(etypes)
+        if t == 2  # 3-node triangle
+            return reshape(enodes[i], 3, :)
+        end
+    end
+    error("No triangle elements found")
+end
+
 
 """
     break_direct_edge!(vertices, triangles, i1, i2) -> (vertices, triangles)

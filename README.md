@@ -12,33 +12,6 @@ WORK IN PROGRESS
 [![LinkedIn][linkedin-shield]][linkedin-url]
 -->
 
-
-<!-- PROJECT LOGO -->
-<!--
-<br />
-<div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
-
-  <h3 align="center">Best-README-Template</h3>
-
-  <p align="center">
-    An awesome README template to jumpstart your projects!
-    <br />
-    <a href="https://github.com/othneildrew/Best-README-Template"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a>
-    &middot;
-    <a href="https://github.com/othneildrew/Best-README-Template/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
-    &middot;
-    <a href="https://github.com/othneildrew/Best-README-Template/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
-  </p>
-</div>
--->
-
-
 <!-- TABLE OF CONTENTS -->
 <details>
   <summary>Table of Contents</summary>
@@ -82,6 +55,7 @@ An investigation of turing patterns on (no-boundary, smooth) 2D manifolds (in 3D
 - Created refined meshes, using a manually initial mesh (4nodes-8triangles).
   - [function to generate meshes](https://github.com/Avina-cK/TuringPatternsOn2DSurfaces/blob/main/src/include/gen_lowresmesh_from0.jl)
   - [.msh files](https://github.com/Avina-cK/TuringPatternsOn2DSurfaces/tree/main/src/Dziuk_surf_meshes) 
+- Created custom linear function interpolation, geometric interpolation, and CellValues (in accordance with Ferrite.jl devdocs) for 2d triangular surface meshes embedded in 3D space. (needs to be tested)
 
 <!--
 See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
@@ -146,8 +120,9 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <!-- ROADMAP -->
 ## Next Steps
 
-- [ ] Add Changelog 
-- [ ] Update documentation on simulating heat equation on Dziuk surface
+- [ ] Test custom interpolation and CellValues. Possibly calculate the matrix and RHS vector manually for 6 node mesh to verify.
+- [ ] Update documentation on simulating heat equation on Dziuk surface.
+
 
 <!--
 See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
@@ -192,7 +167,8 @@ Distributed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3. See `LICENSE.
 <!-- CONTACT -->
 ## Contact
 
-Author name: Avina Kalle 
+Author name: Avina Kalle
+[LinkedIn][linkedin-url]
 
 Project Link: [https://github.com/Avina-cK/TuringPatternsOn2DSurfaces](https://github.com/Avina-cK/TuringPatternsOn2DSurfaces)
 
@@ -208,6 +184,7 @@ Gerhard Dziuk. Finite Elements for the Beltrami operator on arbitrary surfaces, 
 * [Choose an Open Source License](https://choosealicense.com)
 * [Img Shields](https://shields.io)
 * Alan Turing
+* [othneildrew. README Template.](https://github.com/othneildrew/Best-README-Template/)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

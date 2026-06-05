@@ -12,11 +12,10 @@ function assemble_constraint_C!(
     C:: AbstractVector,     # length n_dofs: stores C as a dense row
     dh:: DofHandler,
     qr:: QuadratureRule{RefTriangle},
-    ip:: LTI
+    ip:: Lagrange{RefTriangle, 1}
 )
     fill!(C, 0.0)
 
-    mapping = SurfaceMapping()
     n_basefuncs = getnbasefunctions(ip)
     ce = zeros(n_basefuncs)   # local constraint contributions
 
@@ -25,15 +24,10 @@ function assemble_constraint_C!(
         fill!(ce, 0.0)
 
         for (ξ, w) in zip(Ferrite.getpoints(qr), Ferrite.getweights(qr))
-
-            # Geometry at this quadrature point
             mv = compute_surface_mapping(cell_nodes, ξ)
-            dΩ = get_detJ(mapping, mv) * w     # √det(G) · wq
-
+            dΩ = mv.detJ * w
             for i in 1:n_basefuncs
-                # Scalar identity mapping: φ̂ᵢ(ξ) = φᵢ(x)
-                φᵢ_hat = Ferrite.reference_shape_value(ip, ξ, i)
-                φᵢ = map_shape_value(mapping, φᵢ_hat, mv)
+                φᵢ = Ferrite.reference_shape_value(ip, ξ, i)    #φᵢ = φᵢ_hat
                 ce[i] += φᵢ * dΩ
             end
         end
