@@ -1,5 +1,6 @@
 using Ferrite, Tensors
 #=
+Reference triangle:
 ----------------+--------------------
 Vertex numbers: | Vertex coordinates:
     2           |
@@ -28,7 +29,6 @@ Face numbers:   | Face identifiers:
 ## Helper functions
 """
     Φₜ(cell_nodes, ξ) -> Vec{3,Float64}
- 
 Map reference point `ξ ∈ ℝ²` to the physical point `x ∈ ℝ³` using the three linear Lagrange shape functions of the reference triangle.
 """
 function Φₜ(cell_nodes::Vector{Vec{3, Float64}}, ξ::Vec{2})
@@ -48,7 +48,6 @@ end
 
 """
     J_Φ(cell_nodes) -> Matrix{Float64}  (3x2)
- 
 Jacobian of the map Φₜ.  Because N₃ = 1 - ξ₁ - ξ₂ the gradient contributions from node 3 are (-1, -1), giving the constant matrix
     J = [q₁ - q₃ | q₂ - q₃]   (columns are ∂x/∂ξ₁ and ∂x/∂ξ₂)
 """
@@ -68,7 +67,6 @@ end
 
 """
     matrix_G(J) -> Matrix{Float64}  (2x2)
- 
 First fundamental form  G = Jᵀ J.
 """
 function matrix_G(J::Matrix{Float64})
@@ -77,7 +75,6 @@ end
 
 """
     matrix_invG(J) -> Matrix{Float64}  (2x2)
-
 Analytic inverse of the first fundamental form.
 """
 function matrix_invG(J::Matrix{Float64})
@@ -89,7 +86,6 @@ end
 
 """
     dΩₑ(G) -> Float64
- 
 Surface-element weight: √det(G) = ‖∂x/∂ξ₁ x ∂x/∂ξ₂‖.
 """
 function dΩₑ(G::Matrix{Float64})
@@ -101,10 +97,8 @@ end
 
 """
     SurfaceTriangleMapping{T}
- 
 Pre-computed geometry mapping for a linear triangle in 3D (surface element, rdim = 2, sdim = 3).
-
-∵ the Jacobian J ∈ ℝ³ˣ² is rectangular, the volume-element weight uses the embedding determinant  dΩ = √det(Jᵀ J) = ‖col₁ x col₂‖₂.
+∵ the Jacobian J ∈ ℝ³ˣ² is rectangular, the element weight uses the embedding determinant  dΩ = √det(Jᵀ J) = ‖col₁ x col₂‖₂.
 
 Stored per quadrature point (index `q`):
   * `Jmat[q]`   - plain 3x2 Julia matrix 
@@ -121,8 +115,8 @@ struct SurfaceTriangleMapping{T<:AbstractFloat}
     ip :: Lagrange{RefTriangle, 1} # linear scalar interpolation
  
     # Mutable state filled during reinit!
-    Jmat :: Vector{Matrix{T}}             # 3×2 plain matrices
-    Jtens :: Vector{MixedTensor2{3,2,T}}   # Ferrite Tensors type
+    Jmat :: Vector{Matrix{T}} # 3×2 plain matrices
+    Jtens :: Vector{MixedTensor2{3,2,T}} # Ferrite Tensors type
     detJ :: Vector{T}
     invG :: Vector{Matrix{T}}
     x :: Vector{Vec{3,T}}
@@ -168,7 +162,6 @@ SurfaceTriangleMapping(qr::QuadratureRule) = SurfaceTriangleMapping{Float64}(qr)
 end
 """
     reinit!(m::SurfaceTriangleMapping, cell_nodes::Vec)
- 
 Recompute all geometry quantities for the cell defined by `cell_nodes`(a length-3 vector of `Vec{3,T}`), called once per cell inside the element loop.
 """
 function reinit!(
@@ -212,7 +205,6 @@ end
 
 """
     integrate_scalar(f, m::SurfaceTriangleMapping) -> T
- 
 Compute  ∑_q  w_q · f(x_q) · detJ_q
 where `f(x)` is a user-supplied scalar function of the physical coordinate.
 """
@@ -232,9 +224,7 @@ end
 
 """
     surface_normal(m::SurfaceTriangleMapping{T}, q::Int) -> Vec{3,T}
- 
 Outward unit normal at quadrature point `q`.
- 
     n = (∂x/∂ξ₁ × ∂x/∂ξ₂) / ‖∂x/∂ξ₁ × ∂x/∂ξ₂‖
 """
 function surface_normal(m::SurfaceTriangleMapping{T}, q::Int) where {T}
@@ -256,7 +246,6 @@ end
 
 """
     compute_surface_mapping(nodes, ξ) -> SurfaceMappingValues
-
 Compute all geometry quantities at a single reference point ξ ∈ ℝ².
 This is the per-quadrature-point workhorse called inside reinit!.
 """
@@ -275,20 +264,15 @@ end
 
 """
     get_detJ(mapping, mv) -> T
-
 Extract the embedding determinant from a SurfaceMappingValues.
-The `mapping` argument is accepted for API consistency but unused - all data lives in `mv`.
 """
 @inline get_detJ(::SurfaceTriangleMapping, mv::SurfaceMappingValues) = mv.detJ
 
 
 """
     map_shape_gradient(mapping, ∇φ_ref, mv) -> Vec{3,T}
-
-Push a reference-space gradient ∇φ_hat∈ ℝ² forward to a physical-space surface gradient ∈ ℝ³ using the covariant formula:
-
+Push a reference-space gradient ∇φ_hat ∈ ℝ² forward to a physical-space surface gradient ∈ ℝ³ using:
     ∇ₛφ = J · G⁻¹ · ∇φ_hat
-    
 where J ∈ ℝ³ˣ² is the Jacobian and G⁻¹ = (JᵀJ)⁻¹ ∈ ℝ²ˣ².
 """
 function map_shape_gradient(
@@ -310,12 +294,11 @@ const LTI = Lagrange{RefTriangle,1}
 
 """
     SurfaceCellValues{T, QR, IP} <: Ferrite.AbstractCellValues
- 
-Cell values for a scalar field defined on a surface (2-D triangle embedded in ℝ³).  Wraps a `SurfaceTriangleMapping` so that `reinit!` populates:
- 
-  * `N_surf[i,q]` : shape value  φᵢ(ξ_q)          (same as reference)
-  * `∇N_surf[i,q]` : surface gradient  ∇ₛφᵢ ∈ ℝ³   via J·G⁻¹·∇̂φᵢ
-  * `detJdV[q]` : area-element weight  √det(G)·w_q
+Cell values for a scalar field defined on a surface (2-D triangle embedded in ℝ³).  
+Wraps a `SurfaceTriangleMapping` so that `reinit!` populates:
+  * `N_surf[i,q]` : shape value         φᵢ(ξ_q)     (same as reference)
+  * `∇N_surf[i,q]`: surface gradient   ∇ₛφᵢ ∈ ℝ³   via J·G⁻¹·∇̂φᵢ
+  * `detJdV[q]`   : area-element weight   √det(G)·w_q
 """
 abstract type AbstractSurfaceValues end
 struct SurfaceCellValues{T <: AbstractFloat,
@@ -367,6 +350,7 @@ end
 
 SurfaceCellValues(qr::QuadratureRule{RefTriangle}, ip) = SurfaceCellValues(Float64, qr, ip)
 
+# Ferrite requires these methods to treat SurfaceCellValues as a CellValues type
 Ferrite.getnquadpoints(cv::SurfaceCellValues) = length(cv.detJdV)
 Ferrite.getnbasefunctions(cv::SurfaceCellValues) = size(cv.N_surf, 1)
 Ferrite.getdetJdV(cv::SurfaceCellValues, q::Int) = cv.detJdV[q]
@@ -375,18 +359,9 @@ Ferrite.shape_gradient(cv::SurfaceCellValues, q::Int, i::Int) = cv.∇N_surf[i, 
 Ferrite.shape_value_type(::SurfaceCellValues{T}) where {T} = T
 Ferrite.shape_gradient_type(::SurfaceCellValues{T}) where {T} = Vec{3,T}
 Ferrite.function_interpolation(cv::SurfaceCellValues) = cv.ip
-# Add to your interface methods
 @inline Ferrite.spatial_coordinate(cv::SurfaceCellValues, q::Int, ::Any) = cv.mapping.x[q]
 #Ferrite.get_mapping(cv::SurfaceCellValues) = cv.mapping
 Ferrite.geometric_interpolation(cv::SurfaceCellValues) = cv.mapping.ip
-
-function Ferrite.reinit!(
-        cv   :: SurfaceCellValues{T},
-        cell :: Ferrite.CellCache
-    ) where {T}
-    Ferrite.reinit!(cv, collect(Vec{3,T}, Ferrite.getcoordinates(cell)))  # collect here
-    return cv
-end
 
 function Ferrite.reinit!(
         cv        :: SurfaceCellValues{T},
@@ -401,12 +376,20 @@ function Ferrite.reinit!(
     for (q, (ξ, w)) in enumerate(zip(Ferrite.getpoints(cv.qr), Ferrite.getweights(cv.qr)))
         mv = compute_surface_mapping(nodes, ξ)
         cv.detJdV[q] = mv.detJ * T(w)
-        # cv.mapping.x[q] now set by reinit!(cv.mapping, ...) above — no need to repeat
+        # cv.mapping.x[q] set by reinit!(cv.mapping, ...) above
         for i in 1:no_bfs
-            cv.N_surf[i, q]  = cv.N_ref[i, q]
+            cv.N_surf[i, q] = cv.N_ref[i, q]
             cv.∇N_surf[i, q] = map_shape_gradient(cv.mapping, cv.∇N_ref[i, q], mv)
         end
     end
+    return cv
+end
+
+function Ferrite.reinit!(
+        cv   :: SurfaceCellValues{T},
+        cell :: Ferrite.CellCache
+    ) where {T}
+    Ferrite.reinit!(cv, collect(Vec{3,T}, Ferrite.getcoordinates(cell)))  # collect here
     return cv
 end
 
@@ -418,13 +401,12 @@ function setup_surface_cellvalues(grid::Ferrite.Grid{3, Triangle, Float64})
     cv = SurfaceCellValues(Float64, qr, ip)
  
     println("SurfaceCellValues constructed:")
-    println("  n_quadpoints  = ", Ferrite.getnquadpoints(cv))
-    println("  n_basefuncs   = ", Ferrite.getnbasefunctions(cv))
-    println("  grid cells    = ", Ferrite.getncells(grid))
-    println("  grid nodes    = ", Ferrite.getnnodes(grid))
-    println()
+    println("n_quadpoints = ", Ferrite.getnquadpoints(cv))
+    println("n_basefuncs = ", Ferrite.getnbasefunctions(cv))
+    println("grid cells = ", Ferrite.getncells(grid))
+    println("grid nodes = ", Ferrite.getnnodes(grid))
  
-    # -- test loop: reinit! every cell and accumulate total surface area ----
+    # -- test loop: reinit! every cell and accumulate total surface area --#
     total_area = 0.0
     for cell in CellIterator(grid)
         Ferrite.reinit!(cv, cell)
@@ -432,27 +414,26 @@ function setup_surface_cellvalues(grid::Ferrite.Grid{3, Triangle, Float64})
             total_area += Ferrite.getdetJdV(cv, q)   # ∑ √det(G)·w_q over all cells
         end
     end
-    println("  Total surface area = ", total_area)
+    println("Total surface area = ", total_area)
  
-    # -- spot-check on cell 1 ----------------------------------------------
+    # -- spot-check on cell 1 -----------------#
     cell1_nodes = Ferrite.getcoordinates(grid, 1)
     Ferrite.reinit!(cv, cell1_nodes)
  
-    println("\nCell 1 spot-check (q=1):")
+    println("Cell 1 spot-check (q=1):")
     println("Cell 1 nodes: ", cell1_nodes)
-    println("  detJdV[1]    = ", cv.detJdV[1])
-    println("  N_surf[:,1]  = ", cv.N_surf[:, 1])
-    println("  ∇N_surf[1,1] = ", cv.∇N_surf[1, 1],
-            "  (∈ ℝ³, surface gradient of φ₁)")
-    println("  ∇N_surf[2,1] = ", cv.∇N_surf[2, 1])
-    println("  ∇N_surf[3,1] = ", cv.∇N_surf[3, 1])
+    println("detJdV[1] = ", cv.detJdV[1])
+    println("N_surf[:,1] = ", cv.N_surf[:, 1])
+    println("∇N_surf[1,1] = ", cv.∇N_surf[1, 1], "  (∈ ℝ³, surface gradient of φ₁)")
+    println("∇N_surf[2,1] = ", cv.∇N_surf[2, 1])
+    println("∇N_surf[3,1] = ", cv.∇N_surf[3, 1])
  
     #= -- partition-of-unity check: ∑ N_surf[i,q] == 1 for all q ----------
     for q in 1:Ferrite.getnquadpoints(cv)
         s = sum(cv.N_surf[i,q] for i in 1:Ferrite.getnbasefunctions(cv))
         @assert isapprox(s, 1.0; atol=1e-12) "PoU failed at q=$q: ∑Nᵢ = $s"
     end
-    println("\n  Partition-of-unity check passed Y")
+    println("Partition-of-unity check passed? Y")
     =#
     return cv
 end

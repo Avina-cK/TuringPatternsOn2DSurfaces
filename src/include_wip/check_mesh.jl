@@ -8,46 +8,46 @@ function check_mesh(Ωₕ::Ferrite.Grid)
 
     println("="^50)
     println("Grid summary")
-    println("="^50)
-    println("  Cells (triangles) : ", n_cells)
-    println("  Nodes             : ", n_nodes)
+    println("-"^50)
+    println("Cells (triangles) : ", n_cells)
+    println("Nodes : ", n_nodes)
 
-    # -- 1. Node coordinates -----------------------------------------------
-    println("\n-- Node coordinates --")
+    # -- 1. Node coordinates -----#
+    println("Node coordinates")
     for (i, node) in enumerate(nodes)
-        println("  Node $i : ", node.x)
+        println("Node $i : ", node.x)
     end
 
-    # -- 2. Cell connectivity ----------------------------------------------
-    println("\n-- Cell connectivity --")
+    # -- 2. Cell connectivity ------------------------------------#
+    println("Cell connectivity")
     for (i, cell) in enumerate(cells)
-        println("  Cell $i : nodes ", cell.nodes)
+        println(" Cell $i : nodes ", cell.nodes)
     end
 
-    # -- 3. Check all node references in cells are valid -------------------
-    println("\n-- Node reference validity --")
+    # -- 3. Check all node references in cells are valid ---------------#
+    println("Node reference validity")
     bad_refs = [(ci, nidx) for (ci, cell) in enumerate(cells)
                             for nidx in cell.nodes
                             if !(1 ≤ nidx ≤ n_nodes)]
     if isempty(bad_refs)
-        println("  Y All cell node references are valid (1 to $n_nodes)")
+        println(" Y All cell node references are valid (1 to $n_nodes)")
     else
-        println("  N Invalid references found: ", bad_refs)
+        println(" N Invalid references found: ", bad_refs)
     end
 
-    # -- 4. Check for duplicate nodes -------------------------------------
-    println("\n-- Duplicate node check --")
+    # -- 4. Check for duplicate nodes ------------------#
+    println("Duplicate node check ")
     coords = [node.x for node in nodes]
     dups = [(i,j) for i in 1:n_nodes for j in i+1:n_nodes
                   if norm(coords[i] - coords[j]) < 1e-12]
     if isempty(dups)
-        println("  Y No duplicate nodes found")
+        println(" Y No duplicate nodes found")
     else
-        println("  N Duplicate node pairs: ", dups)
+        println(" N Duplicate node pairs: ", dups)
     end
 
-    # -- 5. Check for degenerate cells ------------------------------------
-    println("\n-- Degenerate cell check --")
+    # -- 5. Check for degenerate cells ------------#
+    println("Degenerate cell check")
     degenerate = Int[]
     for (ci, cell) in enumerate(cells)
         q1 = nodes[cell.nodes[1]].x
@@ -61,13 +61,13 @@ function check_mesh(Ωₕ::Ferrite.Grid)
         end
     end
     if isempty(degenerate)
-        println("  Y No degenerate cells found")
+        println(" Y No degenerate cells found")
     else
-        println("  N Degenerate cells (zero area): ", degenerate)
+        println(" N Degenerate cells (zero area): ", degenerate)
     end
 
-    # -- 6. Cell areas and total surface area -----------------------------
-    println("\n-- Cell areas --")
+    # -- 6. Cell areas and total surface area ---#
+    println("Cell areas")
     total_area = 0.0
     for (ci, cell) in enumerate(cells)
         q1 = nodes[cell.nodes[1]].x
@@ -77,12 +77,12 @@ function check_mesh(Ωₕ::Ferrite.Grid)
         G    = matrix_G(J)
         area = dΩₑ(G) / 2   # (1/2) √det(G) for a triangle
         total_area += area
-        println("  Cell $ci : area = ", round(area; digits=6))
+        println(" Cell $ci : area = ", round(area; digits=6))
     end
-    println("  Total surface area : ", round(total_area; digits=6))
+    println(" Total surface area : ", round(total_area; digits=6))
 
-    # -- 7. Euler characteristic (for closed surface: V - E + F = 2) ------
-    println("\n-- Topology (Euler characteristic) --")
+    # -- 7. Euler characteristic (for closed surface: V - E + F = 2) --#
+    println("Topology (Euler characteristic)")
     edges = Set{Tuple{Int,Int}}()
     for cell in cells
         ns = sort(collect(cell.nodes))
@@ -94,21 +94,19 @@ function check_mesh(Ωₕ::Ferrite.Grid)
     E = length(edges)
     F = n_cells
     χ = V - E + F
-    println("  V (vertices) : $V")
-    println("  E (edges)    : $E")
-    println("  F (faces)    : $F")
-    println("  χ = V-E+F    : $χ  ", χ == 2 ? "Y (sphere topology)" :
-                                     χ == 0 ? "Y (torus topology)"  :
-                                              "N (unexpected — open mesh or non-manifold?)")
+    println("V (vertices) : $V")
+    println("E (edges) : $E")
+    println("F (faces) : $F")
+    println("χ = V-E+F : $χ  ", χ == 2 ? "Y (sphere topology)" :
+                                χ == 0 ? "Y (torus topology)"  :
+                                         "N (unexpected — open mesh or non-manifold?)")
 
-    # -- 8. Node-on-surface check (user supplies expected surface) ---------
-    println("\n-- Distance from expected surface --")
-    println("  (Example: unit sphere — replace with your surface)")
+    # -- 8. Node-on-surface check (user supplies expected surface) -----#
+    println("Distance from expected surface")
     for (i, node) in enumerate(nodes)
-        r = norm(node.x)   # distance from origin — should be 1.0 for unit sphere
-        println("  Node $i : ‖x‖ = ", round(r; digits=8))
+        r = norm(node.x)
+        println(" Node $i : ‖x‖ = ", round(r; digits=4))
     end
-
     println("="^50)
 end
 
