@@ -4,7 +4,7 @@ function assemble_elementKF!(
     func_rhs::Function
     )
 
-    no_bfs = getnbasefunctions(cv)
+    no_bfs = Ferrite.getnbasefunctions(cv)
     fill!(Kₑ, 0.0)
     fill!(fₑ, 0.0)
     for q in 1:Ferrite.getnquadpoints(cv)
@@ -12,11 +12,11 @@ function assemble_elementKF!(
         x = cv.mapping.x[q]
         fᵥ = func_rhs(x[1], x[2], x[3])
         for i in 1:no_bfs
-            ∇φᵢ = shape_gradient(cv, q, i)
-            φᵢ = shape_value(cv, q, i)
+            ∇φᵢ = Ferrite.shape_gradient(cv, q, i)
+            φᵢ = Ferrite.shape_value(cv, q, i)
             fₑ[i] += fᵥ * φᵢ * dΩ_q
             for j in 1:no_bfs
-                ∇φⱼ = shape_gradient(cv, q, j)
+                ∇φⱼ = Ferrite.shape_gradient(cv, q, j)
                 Kₑ[i,j] += (∇φᵢ ⋅ ∇φⱼ) * dΩ_q
             end
         end

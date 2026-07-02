@@ -41,3 +41,39 @@ function assemble_constraint_C!(
 
     return C
 end
+
+
+function assemble_ele_constraint_C!(
+    cₑ::Vector,
+    cv::SurfaceCellValues
+    )
+    no_bfs = Ferrite.getnbasefunctions(cv)
+    fill!(cₑ, 0.0)
+    for q in 1:Ferrite.getnquadpoints(cv)
+        dΩ_q = getdetJdV(cv, q) #√det(G)*w_q
+        for i in 1:no_bfs
+            φᵢ = Ferrite.shape_value(cv, q, i)
+            cₑ[i] += φᵢ * dΩ_q
+        end
+    end
+    return cₑ
+end
+
+function assemble_globalC(dh::Ferrite.DofHandler, cv::SurfaceCellValues)
+    ndofs = Ferrite.ndofs(dh)
+    C = zeros(ndofs)
+
+    no_bfs = Ferrite.getnbasefunctions(cv)
+    cₑ = zeros(no_bfs)
+
+    for cell in Ferrite.CellIterator(dh)
+        Ferrite.reinit!(cv, cell)
+        assemble_ele_constraint_C!(cₑ, cv)
+        dofs = Ferrite.celldofs(cell)
+        for (i, dof) in enumerate(dofs)
+            C[dof] += cₑ[i]
+        end
+    end
+
+    return C
+end

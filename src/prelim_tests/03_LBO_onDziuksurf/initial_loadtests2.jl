@@ -21,13 +21,13 @@ qr = QuadratureRule{RefTriangle}(1)
 ip = Lagrange{RefTriangle, 1}()
 cellvalues_Ω = setup_surface_cellvalues(Ωₕ)
 
-dh = DofHandler(Ωₕ)
-add!(dh, :u, ip)
-close!(dh)
+dh = Ferrite.DofHandler(Ωₕ)
+Ferrite.add!(dh, :u, ip)
+Ferrite.close!(dh)
 
 ## Check dofs 
 # for P1 scalar field: 1 DoF per node
-@assert ndofs(dh) == getnnodes(Ωₕ) "Error: no. DoFs ≠ no. nodes"
+@assert Ferrite.ndofs(dh) == Ferrite.getnnodes(Ωₕ) "Error: no. DoFs ≠ no. nodes"
 
 # Verify all cells have 3 dofs (P1 triangle)
 for i in 1:getncells(Ωₕ)
@@ -36,11 +36,11 @@ end
 
 ## Assemble global stiffness matrix Kₕ and load vector F
 n_dofs = ndofs(dh)
-include("func_assembleKF.jl")
+include("func_assembleKF_manual.jl")
 F = zeros(n_dofs)
 include("manufactured_sol.jl")
 
-Kₕ, F = assemble_globalKF(F, dh, cellvalues_Ω, rhs_func)
+Kₕ, F = assemble_globalKF(dh, cellvalues_Ω, rhs_func)
 
 ## Testing Kₕ
 @assert Kₕ == Kₕ' "Kₕ is not symmetric"   #symmetry

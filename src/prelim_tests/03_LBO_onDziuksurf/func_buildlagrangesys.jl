@@ -18,10 +18,10 @@ function build_lagrange_system(
     @assert length(C) == n "C must have length n"
 
     # -- Augmented matrix A ∈ ℝ^(n+1 × n+1) -------------------------#
-    #   A = [ K_h   C ]   <- last column is Cᵀ (stored as column)
-    #       [  Cᵀ   0 ]   <- last row is C, bottom-right is 0
+    #   A = [ K_h   C ] : last column is Cᵀ (stored as column)
+    #       [ Cᵀ    0 ] : last row is C, bottom-right is 0
     C_col = sparse(C)
-    A = [Kₕ        C_col        ;
+    A = [Kₕ C_col;
          transpose(C_col) sparse([0.0])]
 
     # -- Augmented RHS b ∈ ℝ^(n+1) ------------------------------------#

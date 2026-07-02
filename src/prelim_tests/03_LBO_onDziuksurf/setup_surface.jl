@@ -22,11 +22,11 @@ Face numbers:   | Face identifiers:
     | \         |
     |   \       | f1: (v1, v2, v3)
     |  1  \     |
-    +-------+   |
-----------------+--------------------
+    +-------+   | 
+----------------+-------------------- 
 =#
 
-## Helper functions
+## Part 0: Helper functions
 """
     Φₜ(cell_nodes, ξ) -> Vec{3,Float64}
 Map reference point `ξ ∈ ℝ²` to the physical point `x ∈ ℝ³` using the three linear Lagrange shape functions of the reference triangle.
@@ -92,7 +92,7 @@ function dΩₑ(G::Matrix{Float64})
     return sqrt(det(G))
 end
 
-## SurfaceTriangleMapping
+## Part 1: SurfaceTriangleMapping
 # https://github.com/Ferrite-FEM/Ferrite.jl/blob/4eec1a347ebbaebd72db9c3d7e67b97d120b08b9/src/FEValues/GeometryMapping.jl
 
 """
@@ -235,7 +235,7 @@ function surface_normal(m::SurfaceTriangleMapping{T}, q::Int) where {T}
     return cross_vec / norm(cross_vec)
 end
 
-##SurfaceMappingValues
+## Part 2: SurfaceMappingValues
 
 struct SurfaceMappingValues{T<:AbstractFloat}
     J :: Matrix{T} # 3×2 Jacobian
@@ -283,14 +283,15 @@ function map_shape_gradient(
     # G⁻¹ ∇φ_hat (2-vector in reference space)
     g = mv.invG * collect(∇φ_ref)           # 2×2 · [2]->[2]
     # J · (G⁻¹ ∇φ_hat) (3-vector in physical space)
-    v = mv.J * g                             # 3×2 · [2]->[3]
+    v= g
+    #v = mv.J * g                             # 3×2 · [2]->[3]
     return Vec{3,T}((v[1], v[2], v[3]))
 end
 
 
-##
+## Part 3: SurfaceCellValues
 
-const LTI = Lagrange{RefTriangle,1}
+#const LTI = Lagrange{RefTriangle,1}
 
 """
     SurfaceCellValues{T, QR, IP} <: Ferrite.AbstractCellValues
@@ -393,11 +394,12 @@ function Ferrite.reinit!(
     return cv
 end
 
-##
+## Part 4:
+
 function setup_surface_cellvalues(grid::Ferrite.Grid{3, Triangle, Float64})
  
     qr = QuadratureRule{RefTriangle}(1) # 1-point centroid rule (degree 1)
-    ip = LTI() # Lagrange{RefTriangle,1}
+    ip = Lagrange{RefTriangle,1}() # Lagrange{RefTriangle,1}
     cv = SurfaceCellValues(Float64, qr, ip)
  
     println("SurfaceCellValues constructed:")
@@ -417,24 +419,18 @@ function setup_surface_cellvalues(grid::Ferrite.Grid{3, Triangle, Float64})
     println("Total surface area = ", total_area)
  
     # -- spot-check on cell 1 -----------------#
-    cell1_nodes = Ferrite.getcoordinates(grid, 1)
+    cn=1
+    cell1_nodes = Ferrite.getcoordinates(grid, cn)
     Ferrite.reinit!(cv, cell1_nodes)
  
-    println("Cell 1 spot-check (q=1):")
-    println("Cell 1 nodes: ", cell1_nodes)
+    println("Cell $(cn) spot-check (q=1):")
+    println("Cell $(cn) nodes: ", cell1_nodes)
     println("detJdV[1] = ", cv.detJdV[1])
     println("N_surf[:,1] = ", cv.N_surf[:, 1])
     println("∇N_surf[1,1] = ", cv.∇N_surf[1, 1], "  (∈ ℝ³, surface gradient of φ₁)")
     println("∇N_surf[2,1] = ", cv.∇N_surf[2, 1])
     println("∇N_surf[3,1] = ", cv.∇N_surf[3, 1])
- 
-    #= -- partition-of-unity check: ∑ N_surf[i,q] == 1 for all q ----------
-    for q in 1:Ferrite.getnquadpoints(cv)
-        s = sum(cv.N_surf[i,q] for i in 1:Ferrite.getnbasefunctions(cv))
-        @assert isapprox(s, 1.0; atol=1e-12) "PoU failed at q=$q: ∑Nᵢ = $s"
-    end
-    println("Partition-of-unity check passed? Y")
-    =#
+
     return cv
 end
 
