@@ -1,8 +1,8 @@
 """
-    L2_norm(u_given::Vector, cellvalues::CellValues, dh::DofHandler)
+    L2_norm(u_given::Vector, cellvalues, dh::DofHandler)
     Compute the L-2 norm of the given function
 """
-function L2_norm(u_given::Vector, cellvalues::CellValues, dh::DofHandler)
+function L2_norm(u_given::Vector, cellvalues, dh::DofHandler)
     norm_sq = 0.0
 
     for cell in CellIterator(dh)
@@ -22,12 +22,12 @@ function L2_norm(u_given::Vector, cellvalues::CellValues, dh::DofHandler)
 end
 
 """
-    compute_L2_error(u_h::Vector, u_exact::Vector, cellvalues::CellValues, dh::DofHandler)
+    compute_L2_error(u_h::Vector, u_exact::Vector, cellvalues, dh::DofHandler)
 Compute the L-2 error between the simulated and true solution
     ‖ u - uₕ ‖_(L²)
 
 """
-function compute_L2_error(u_h::Vector, u_exact::Vector, cellvalues::CellValues, dh::DofHandler)
+function compute_L2_error(u_h::Vector, u_exact::Vector, cellvalues, dh::DofHandler)
     error_sq = 0.0
 
     for cell in CellIterator(dh)
@@ -49,10 +49,10 @@ function compute_L2_error(u_h::Vector, u_exact::Vector, cellvalues::CellValues, 
 end
 
 """
-    compute_relative_error(u_h::Vector, u_exact::Vector, cellvalues::CellValues, dh::DofHandler)
+    compute_relative_error(u_h::Vector, u_exact::Vector, cellvalues, dh::DofHandler)
         ‖(u-uₕ)‖_(L²) / ‖u‖_(L²)
 """
-function relative_L2_error(u_h::Vector, u_exact::Vector, cellvalues::CellValues, dh::DofHandler)
+function relative_L2_error(u_h::Vector, u_exact::Vector, cellvalues, dh::DofHandler)
     num = compute_L2_error(u_h, u_exact, cellvalues, dh)
     denom = L2_norm(u_exact, cellvalues, dh)
     return num/denom

@@ -240,3 +240,14 @@ function Ferrite.reinit!(cv::SurfaceCellValues{IP, T}, cell) where {IP, T}
     end
     return cv
 end
+
+function Ferrite.function_value(cv::SurfaceCellValues{IP, T}, q_point::Int, u::AbstractVector) where {IP, T}
+    n_basefuncs = Ferrite.getnbasefunctions(cv)
+    length(u) == n_basefuncs ||
+        throw(ArgumentError("length(u) = $(length(u)) but cv has $n_basefuncs basis functions"))
+    val = zero(T)
+    @inbounds for i in 1:n_basefuncs
+        val += Ferrite.shape_value(cv, q_point, i) * u[i]
+    end
+    return val
+end
