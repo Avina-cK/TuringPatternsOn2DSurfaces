@@ -1,6 +1,6 @@
 # Brief overview of file contents
 
-## funcs_error_analysis.jl
+## [funcs_error_analysis.jl](funcs_error_analysis.jl) <a name="error_funcs_readme"></a>
 Defines three functions to calculate $L^2$-errors on a grid, $\Omega$:
 1. `L2_norm(u_given::Vector, cellvalues::CellValues, dh::DofHandler)`: Computes the discrete version of the square of the $L^2$ norm of a function $u$ (`u_given`) as 
 ```math
@@ -20,7 +20,7 @@ Computes the discrete version of the square of the $L^2$ error of a function, $u
      EOC\left(h_1, h_2 \right) =\frac{ \log \left( {\frac{∥u_{exact} - u_{h_1}∥_{L^2}^2}{∥u_{exact} - u_{h_2}∥_{L^2}^2}}\right)} {\log \left({\frac{h_1}{h_2}} \right) }
 ```
 
-## funcs_gensurface.jl
+## [funcs_gensurface.jl](funcs_gensurface.jl)
 Defines six functions used to generate the Dziuk implicit surface mesh, given by { $(x_1, x_2, x_3):d_S(x_1, x_2, x_3)=0$ }.
 1. `Dziuk_surface(x,y,z)`
 ```math
@@ -39,10 +39,10 @@ d_S (x,y,z) = z^2 + y^2 + (x - z^2)^2 - 1.0
 6. `surface_lloyd(coords, triangles; iterations, fixed_indices)`: Implements LLoyd's algorithm on a mesh for a given number of iterations and projects the new vertices back to the Dzuik surface (in each iteration). If `fixed indices` contains the indices of vertices that should not be moved, then the function ensures that. The Lloyd's algorithm basically calculates the area, $A_i$ , and centroid, $c_i$ , of all triangles, and then uses the following formula to calculate the new coordinates of each vertex, $v_i$:
 ```math
 v_i^{new} = \frac{1}{\sum_j{A_j}} \cdot \sum_j {A_j \cdot c_j}
-```
-where $j$ is runs over all triangles touching $v_i$.
+``` 
+where $j$ is runs over all triangles containing $v_i$.
 
-## sym_funcs.jl
+## [funcs_sym.jl](funcs_sym.jl)
 Uses the Symbolics library to compile Julia functions that defines the following, given a function $d(x,y,z)$ (that describes a surface, $S=\{x \in \mathbb{R}^3 : d(x)=0\}$) and a function $u(x,y,z)$:
 1. `normal_atpt(d::Function) -> n(x,y,z)::Function`: Generates a function that describes the normal to the surface $S$.
  ```math
@@ -56,3 +56,12 @@ Uses the Symbolics library to compile Julia functions that defines the following
 ```math
 \Delta _S (u) = \nabla _S \cdot \nabla _S (u) 
 ```
+
+## [func_mesh_size.jl](func_mesh_size.jl)
+`mesh_size() -> Float64`
+
+When called inside an open Gmsh instance with a mesh, this function calculates the maximum edge length, $h$, by going through the lengths of all edges.
+```math
+h = \max{ \{ \mathrm{norm} ( v_i - v_j ) \ \forall v_i\ne v_j \mathrm{\ that\ share\ an\ edge}\} }
+```
+
