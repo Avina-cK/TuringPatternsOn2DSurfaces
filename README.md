@@ -45,17 +45,17 @@ An investigation of turing patterns on (no-boundary, smooth) 2D manifolds (in 3D
 * [![Julia][Julia-shield]][Julia-url]
   *  [Ferrite.jl](https://ferrite-fem.github.io/Ferrite.jl/stable/)
   *  [Symbolics.jl](https://github.com/JuliaSymbolics/Symbolics.jl)
-* [![Gmsh][Gmsh-url]]
+* [Gmsh](Gmsh-url)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- PROGRESS -->
 ## Progress so far
-- Solved stationary heat equation on Dziuk surface. (See [02_heateq_on_dziuksurf](https://github.com/Avina-cK/TuringPatternsOn2DSurfaces/tree/main/src/prelim_tests/02_heateq_on_dziuksurf))
+- Solved stationary heat equation on sphere. (See [02_LBO_onSphere](https://github.com/Avina-cK/TuringPatternsOn2DSurfaces/tree/main/src/prelim_tests/02_LBO_onSphere))
 - Created refined meshes, using a manually initial mesh (4nodes-8triangles).
   - [function to generate meshes](https://github.com/Avina-cK/TuringPatternsOn2DSurfaces/blob/main/src/include/gen_lowresmesh_from0.jl)
   - [.msh files](https://github.com/Avina-cK/TuringPatternsOn2DSurfaces/tree/main/src/Dziuk_surf_meshes) 
-- Created custom linear function interpolation, geometric interpolation, and CellValues (in accordance with Ferrite.jl devdocs) for 2d triangular surface meshes embedded in 3D space. (needs to be tested)
+- Created custom mapping and CellValues (in accordance with Ferrite.jl devdocs) for 2d triangular surface meshes embedded in 3D space.
 
 <!--
 See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
@@ -120,8 +120,8 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <!-- ROADMAP -->
 ## Next Steps
 
-- [ ] Test custom interpolation and CellValues. Possibly calculate the matrix and RHS vector manually for 6 node mesh to verify.
-- [ ] Update documentation on simulating heat equation on Dziuk surface.
+- [ ] Test stationary equation solver on Dzuik surface.
+- [ ] Update documentation on simulating stationary heat equation on sphere.
 
 
 <!--
