@@ -188,5 +188,5 @@ function surface_lloyd(coords, triangles; iterations=50, fixed_indices=Int[], re
     end
     # reshape vertex list appropriately
     newcoords = hcat(pts...)
-    return newcoords, triangles
+    return newcoords
 end

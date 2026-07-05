@@ -99,7 +99,7 @@ function gensurfmesh_from0(ref::Int=0; λᵧ=0.0001)
     end
 
     # generate mesh in gmsh
-    gmsh.model.mesh.generate(2)
+    #gmsh.model.mesh.generate(2)
 
     # calculate min and max edge length
     node_tags, node_coords, _ = gmsh.model.mesh.getNodes()

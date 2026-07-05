@@ -63,6 +63,7 @@ function solve_laplace_eq_on_sphere(refinement, u_exact::Function, f_rhs::Functi
     end
      
 end
+
 Ωₕ = create_embedded_sphere(0)
 qr = QuadratureRule{RefTriangle}(1)
 ip = Lagrange{RefTriangle, 1}()

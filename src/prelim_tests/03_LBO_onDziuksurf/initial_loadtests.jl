@@ -1,16 +1,17 @@
 using Ferrite, Tensors, SparseArrays
-include("setup_surface.jl")
+include("surface_cell_values.jl")
+include("../../include/read_Dzuik_mesh.jl")
+include("../../include/funcs_error_analysis.jl")
+include("func_assembleKF.jl")
+include("manufactured_sol.jl")
 
 ## Load mesh
-include("../../include/func_loadmesh.jl")
-refinement = 6
+
+refinement = 2
 filename = "lowresmesh_$(refinement).msh"
 cd(@__DIR__)
 cd("../../Dziuk_surf_meshes/")
-Ωₕ, h = load_mesh(filename);
-# flip to counter-clockwise orientation
-flipped_cells = [Triangle((c.nodes[2], c.nodes[1], c.nodes[3])) for c in Ωₕ.cells]
-Ωₕ = Grid(flipped_cells, Ωₕ.nodes)
+Ωₕ, h = load_Dzuik_mesh(filename)
 
 @info "Grid imported for refinement level $refinement"
 cd(@__DIR__)
@@ -19,11 +20,12 @@ cd(@__DIR__)
 ## Setup FE spaces and cell values
 qr = QuadratureRule{RefTriangle}(1)
 ip = Lagrange{RefTriangle, 1}()
-cellvalues_Ω = setup_surface_cellvalues(Ωₕ)
 
 dh = DofHandler(Ωₕ)
 add!(dh, :u, ip)
 close!(dh)
+
+cellvalues_Ω = SurfaceCellValues(qr, ip)
 
 ## Check dofs 
 # for P1 scalar field: 1 DoF per node
@@ -36,11 +38,7 @@ end
 
 ## Assemble global stiffness matrix Kₕ and load vector F
 n_dofs = ndofs(dh)
-include("func_assembleKF.jl")
-F = zeros(n_dofs)
-include("manufactured_sol.jl")
-
-Kₕ, F = assemble_globalKF(F, dh, cellvalues_Ω, rhs_func)
+Kₕ, F = assemble_globalKF(dh, cellvalues_Ω, (x, y, z) -> rhs_func(x, y, z))
 
 ## Testing Kₕ
 @assert Kₕ == Kₕ' "Kₕ is not symmetric"   #symmetry
@@ -48,25 +46,34 @@ Kₕ, F = assemble_globalKF(F, dh, cellvalues_Ω, rhs_func)
 
 ## Assemble constraint vector C
 
-include("func_assembleconstraintC.jl")
-C = zeros(n_dofs)
-assemble_constraint_C!(C, dh, qr, ip)
-for i in 1:n_dofs; @assert C[i]>0 "C has zero-valued elements"; end 
+_, c = assemble_globalKF(dh, cellvalues_Ω, (x, y, z) -> 1.0)  # c_i = ∫φᵢ dΩ
+for i in 1:n_dofs; @assert c[i]>0 "c has zero-valued elements"; end 
 
 ## Build Lagrange system and solve for u_h
-include("func_buildlagrangesys.jl")
-A, b = build_lagrange_system(Kₕ, F, C)
-uμ = A\b
-u_h = uμ[1:n_dofs]
+A = [Kₕ c; c' 0.0]
+A = sparse(A)
+b = [F; 0.0]
+
+sol = A \ b
+u_h = sol[1:n_dofs]
+u_h = u_h .- mean(u_h)
+λ = sol[end]  # Lagrange multiplier
+abs(λ)>1e-3 && @warn "Langrange multiplier is large: $(λ)"   # should be very small
+
+## Compute the true solution
+u_ex = zeros(length(u_h))
+u_ex = apply_analytical!(u_ex, dh, :u, x -> u_chosen(x[1],x[2],x[3]))
 
 ## Compute L2 error against true solution
-include("func_assemble_u_true.jl")
-u_true_vec = assemble_true_solution(u_chosen, dh,ip)
+u_ex = u_ex .- mean(u_ex)
+err = abs.(u_h .- u_ex)
+L2error = compute_L2_error(u_h, u_ex, cellvalues_Ω, dh)
 
-mean_u_true = dot(C, u_true_vec) / sum(C)
-u_true_centered = u_true_vec .- mean_u_true
+VTKGridFile("surface_laplace_Dzuik_surf_$(refinement)", dh) do vtk
+    write_solution(vtk, dh, u_h, "_h")
+    write_solution(vtk, dh, err, "_err")
+    write_solution(vtk, dh, u_ex, "_true")
+end
 
-@assert abs(dot(C, u_true_centered)) < 1e-10 "u_true not zero-mean after centering"
-
-include("func_L2_norm.jl")
-l2_err  = L2_error(u_true_centered, u_h, dh, qr, ip)
+println("max nodal error    : ", maximum(abs, err))
+println("L2 err: ", L2error)

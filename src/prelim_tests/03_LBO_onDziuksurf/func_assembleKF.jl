@@ -24,24 +24,85 @@ function assemble_elementKF!(
     return Kₑ, fₑ
 end
 
-function assemble_globalKF(F::AbstractVector, dh::DofHandler, cv::SurfaceCellValues, func_rhs_g::Function)
-    sp = init_sparsity_pattern(dh)
-    add_sparsity_entries!(sp, dh)
-    Kₕ = allocate_matrix(sp)
-    fill!(F, 0.0)
-    
-    assembler = start_assemble(Kₕ, F)
-    T = eltype(Ferrite.matrix_handle(assembler))
-    no_bfs = getnbasefunctions(cv)
+function assemble_globalKF(dh::Ferrite.DofHandler, cv::SurfaceCellValues, func_rhs::Function)
+    ndofs = Ferrite.ndofs(dh)
+    K = zeros(ndofs, ndofs)
+    f = zeros(ndofs)
 
-    Kₑ = zeros(T, no_bfs, no_bfs)
+    no_bfs = Ferrite.getnbasefunctions(cv)
+    Kₑ = zeros(no_bfs, no_bfs)
     fₑ = zeros(no_bfs)
 
-    for cell in CellIterator(dh)
+    for cell in Ferrite.CellIterator(dh)
         Ferrite.reinit!(cv, cell)
-        assemble_elementKF!(Kₑ, fₑ, cv, func_rhs_g)
-        assemble!(assembler, celldofs(cell), Kₑ, fₑ)
+
+        # compute local element matrix/vector
+        assemble_elementKF!(Kₑ, fₑ, cv, func_rhs)
+
+        # global dof indices for this cell
+        dofs = Ferrite.celldofs(cell)
+
+        for i in 1:no_bfs
+            gi = dofs[i]
+            f[gi] += fₑ[i]
+            for j in 1:no_bfs
+                gj = dofs[j]
+                K[gi, gj] += Kₑ[i, j]
+            end
+        end
     end
-    return Kₕ, F
-    
+
+    return K, f
+end
+
+
+function assemble_integral_uh(
+    cv::SurfaceCellValues,
+    uₕ::Vector
+    )
+    no_bfs = Ferrite.getnbasefunctions(cv)
+    uₑ = zeros(no_bfs)
+    fill!(uₑ, 0.0)
+    for q in 1:Ferrite.getnquadpoints(cv)
+        dΩ_q = getdetJdV(cv, q) # √det(G) * w_q
+        x = cv.mapping.x[q]
+
+        u_q = 0.0
+        for j in 1:no_bfs
+            φⱼ = Ferrite.shape_value(cv, q, j)
+            u_q += uₕ[j] * φⱼ
+        end
+
+        for i in 1:no_bfs
+            φᵢ = Ferrite.shape_value(cv, q, i)
+            uₑ[i] += u_q * φᵢ * dΩ_q
+        end
+    end
+    return uₑ
+end
+
+function assemble_integral_global_uh(dh::Ferrite.DofHandler, cv::SurfaceCellValues, uₕ::Vector)
+    ndofs = Ferrite.ndofs(dh)
+    U = zeros(ndofs)
+
+    no_bfs = Ferrite.getnbasefunctions(cv)
+
+    uₑ = zeros(no_bfs)
+
+    for cell in Ferrite.CellIterator(dh)
+        Ferrite.reinit!(cv, cell)
+
+        # compute local element matrix/vector
+        uₑ = assemble_integral_uh(cv, uₕ[celldofs(cell)])
+
+        # global dof indices for this cell
+        dofs = Ferrite.celldofs(cell)
+
+        for i in 1:no_bfs
+            gi = dofs[i]
+            U[gi] += uₑ[i]
+        end
+    end
+
+    return U
 end
