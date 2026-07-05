@@ -29,3 +29,6 @@ src/prelim_tests/03_LBO_onDziuksurf/surface_laplace_Dzuik_surf_2.vtu
 src/prelim_tests/03_LBO_onDziuksurf/surface_laplace_Dzuik_surf_3.vtu
 src/prelim_tests/03_LBO_onDziuksurf/surface_laplace_Dzuik_surf_5.vtu
 src/prelim_tests/03_LBO_onDziuksurf/surface_laplace_Dzuik_surf_6.vtu
+src/prelim_tests/02_LBO_onSphere/results/result_sphere_1_u_err.png
+src/prelim_tests/02_LBO_onSphere/results/result_sphere_1_u_h.png
+src/prelim_tests/02_LBO_onSphere/results/result_sphere_1_u_true.png

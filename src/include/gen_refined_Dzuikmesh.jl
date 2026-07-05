@@ -26,7 +26,7 @@ Lloyd's algorithm
 - `iterations`: number of Lloyd iterations to perform (default: 50)
 - `fixed_indices`: vector of vertex indices to keep fixed during iterations (default: empty)
 """
-function surface_lloyd(coords, triangles; iterations=50, fixed_indices=Int[], repel::Bool=false, ϵ=1e-15, λₗ=0.001)
+function surface_lloyd(coords, triangles; iterations=50, fixed_indices=Int[])
     pts = [coords[:, i] for i in axes(coords, 2)]
     fixed_set = Set(fixed_indices)
     n = length(pts)
@@ -72,28 +72,6 @@ function surface_lloyd(coords, triangles; iterations=50, fixed_indices=Int[], re
             # updates pts vector
             pts[i] .= (px,py,pz)
         end
-
-        if repel
-            # move points that are too closed to each other
-            for i in 1:n
-                i in fixed_set && continue
-                move = zeros(3)
-                for j in adj[i]
-                    diff = pts[i] - pts[j]
-                    dist2= dot(diff,diff) + ϵ
-                    move .+= diff ./ dist2
-                end
-                pts[i] .+= λₗ * move
-            end
-            
-            # project to implicit surface
-            for i in 1:n
-                i in fixed_set && continue    
-                px,py,pz = project_to_surf(pts[i]...)
-                pts[i] .= (px,py,pz)
-            end
-        end
-
     end
     # reshape vertex list appropriately
     newcoords = Vector(hcat(pts...)[1:end])
@@ -110,8 +88,8 @@ cd(@__DIR__)
 filename="../Dziuk_surf_meshes/Dzuik_mesh_9.msh"
 gmsh.open(filename)
 
-final_ref = 15
-for r in 10:final_ref
+final_ref = 10
+for r in 1:10
     gmsh.model.mesh.refine()
     node_tags, node_coords = gmsh.model.mesh.getNodes()
     no_nodes = length(node_tags)
@@ -128,27 +106,26 @@ for r in 10:final_ref
     for i in 1:no_nodes
         gmsh.model.mesh.setNode(node_tags[i], newnodes[i], [])
     end
-
-    if r<9
-        triangles = gmsh.model.mesh.getElements(2)[3][1]
-        triangles = reshape(triangles, 3, :)
-        vertices = gmsh.model.mesh.getNodes()[2]
-        vertices = reshape(node_coords, 3, :)
-        lloyded_vertices = surface_lloyd(vertices, triangles)
-        
-        if r<=5
-            for i in 1:length(lloyded_vertices)
-                if abs(lloyded_vertices[i])<1e-15
-                    lloyded_vertices[i]=0.0
-                end
+   
+    triangles = gmsh.model.mesh.getElements(2)[3][1]
+    triangles = reshape(triangles, 3, :)
+    vertices = gmsh.model.mesh.getNodes()[2]
+    vertices = reshape(node_coords, 3, :)
+    lloyded_vertices = surface_lloyd(vertices, triangles)
+            
+    if r<=5
+        for i in 1:length(lloyded_vertices)
+            if abs(lloyded_vertices[i])<1e-15
+                lloyded_vertices[i]=0.0
             end
         end
-        lloyded_vertices=reshape(lloyded_vertices, 3, no_nodes)
-
-        for i in 1:no_nodes
-            gmsh.model.mesh.setNode(node_tags[i], lloyded_vertices[1:3,i], [])
-        end
     end
+    lloyded_vertices=reshape(lloyded_vertices, 3, no_nodes)
+
+    for i in 1:no_nodes
+        gmsh.model.mesh.setNode(node_tags[i], lloyded_vertices[1:3,i], [])
+    end
+
     cd(@__DIR__)
     gmsh.write("../Dziuk_surf_meshes/Dzuik_mesh_$(r).msh")
 
