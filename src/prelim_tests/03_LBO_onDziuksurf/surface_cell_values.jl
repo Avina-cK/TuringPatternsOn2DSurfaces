@@ -108,6 +108,7 @@ function surface_normal(J::Matrix{T}) where {T}
     c1 = Vec{3, T}((J[1, 1], J[2, 1], J[3, 1]))
     c2 = Vec{3, T}((J[1, 2], J[2, 2], J[3, 2]))
     n = c1 × c2
+    #n = Vec{3, T}((abs.(n[1]), abs.(n[2]), abs.(n[3])))
     return n / norm(n)
 end
 

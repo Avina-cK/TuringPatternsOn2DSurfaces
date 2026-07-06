@@ -108,33 +108,47 @@ function negΔₛ(u::Function, d::Function, opfilename::String="cfunc_negLBO.jl"
     u_sym = u(sym_x₁, sym_x₂, sym_x₃)
     d_sym = d(sym_x₁, sym_x₂, sym_x₃)
     gradu = Symbolics.gradient(u_sym, [sym_x₁, sym_x₂, sym_x₃])
+    gradu = Symbolics.simplify(gradu)
     gradd = Symbolics.gradient(d_sym, [sym_x₁, sym_x₂, sym_x₃])
+    #gradd = Symbolics.simplify(gradd)
     norm_n = sqrt(sum(gradd.^2))
     n = gradd ./ norm_n
-    TG_sym = gradu .- (sum(gradu .* n) .* n)
 
-    # Compute jacobian of tangential gradient
-    JTG_sym = Symbolics.jacobian(TG_sym, [sym_x₁, sym_x₂, sym_x₃])
-    nΔₛ_sym = -(JTG_sym[1,1] + JTG_sym[2,2] + JTG_sym[3,3])  # trace = divergence
+    # v = ∇u - (∇u ⋅ n)n
+    v_sym = gradu .- (sum(gradu .* n) .* n)
 
+    # ∇⋅v
+    Jv_sym = Symbolics.jacobian(v_sym, [sym_x₁, sym_x₂, sym_x₃])
+    div_v_sym = Jv_sym[1,1] + Jv_sym[2,2] + Jv_sym[3,3]  # trace = divergence
+
+    # ∇vᵢ for i∈{1,2,3}
+    ∇v₁_sym = Symbolics.gradient(v_sym[1], [sym_x₁, sym_x₂, sym_x₃])
+    ∇v₂_sym = Symbolics.gradient(v_sym[2], [sym_x₁, sym_x₂, sym_x₃])
+    ∇v₃_sym = Symbolics.gradient(v_sym[3], [sym_x₁, sym_x₂, sym_x₃])
+
+    # wⱼ = (∇vⱼ ⋅ n)nⱼ
+    w₁_sym = sum(∇v₁_sym .* n) * n[1]
+    w₂_sym = sum(∇v₂_sym .* n) * n[2]
+    w₃_sym = sum(∇v₃_sym .* n) * n[3]
+
+    #Δₛu = ∇ₛ ⋅ v = (∇⋅v) - ∑ⱼ₌₁³((∇vⱼ ⋅ n)nⱼ)
+    Δₛu_sym = div_v_sym - (w₁_sym + w₂_sym + w₃_sym)
+    nΔₛ_sym = -Δₛu_sym
+    #nΔₛ_sym = Symbolics.expand(nΔₛ_sym)
     nΔₛ_expr = build_function(nΔₛ_sym, sym_x₁, sym_x₂, sym_x₃;
-                                 expression = Val{true},
-                                 simplify = Val{true})
+                                 expression = Val{true})
     
-    code = """
-        $(nΔₛ_expr)
-    """
+    code = "negΔₛ_generated = $(nΔₛ_expr)\n"
     
     write(opfilename, code)
 
     # Return function for immediate use
     return build_function(nΔₛ_sym, sym_x₁, sym_x₂, sym_x₃;
-                         expression = Val{false},
-                         simplify = Val{true})
+                         expression = Val{false})
 end
 @info "Loaded symbolically defined functions: normal_atpt(d), ∇ₛ(u,d) and Δₛ(u,d)."
 
-#= De-comment the following if you want to (re-)generate functions for the Dzuik surface and given u
+# De-comment the following if you want to (re-)generate functions for the Dzuik surface and given u
 include("func_DzuikSurface.jl")
 
 function u_chosen(x,y,z)
@@ -144,4 +158,5 @@ cd(@__DIR__)
 #∇ₛu_chosen = ∇ₛ(u_chosen, Dziuk_surface; outputfile=true, opfilename="cfunc_tangrad.jl")
 #Δₛu_chosen = Δₛ(u_chosen, Dziuk_surface; outputfile=true, opfilename="cfunc_LBO.jl")
 negΔₛu_chosen = negΔₛ(u_chosen, Dziuk_surface, "cfunc_negLBO.jl")
-=#
+
+

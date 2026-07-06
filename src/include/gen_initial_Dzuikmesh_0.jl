@@ -12,14 +12,14 @@ vertices0 = [1.25, 0.0, -sqrt(3)/2, #1 : bottom pole
 vertices0_numbering = collect(1:(length(vertices0)÷3))
 
 # Initial surface has 8 triangles:
-triangles0 = [1, 2, 4,
-              1, 4, 5,
-              1, 5, 6,
-              1, 6, 2,
-              3, 4, 2,
-              3, 5, 4,
-              3, 6, 5,
-              3, 2, 6]
+triangles0 = [1, 4, 2,
+              1, 5, 4,
+              1, 6, 5,
+              1, 2, 6,
+              3, 2, 4,
+              3, 4, 5,
+              3, 5, 6,
+              3, 6, 2]
 triangles0_numbering = collect(1:(length(triangles0)÷3))
 
 ## Create mesh using Gmsh

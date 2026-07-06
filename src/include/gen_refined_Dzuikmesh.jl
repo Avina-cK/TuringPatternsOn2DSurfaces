@@ -85,11 +85,14 @@ using Gmsh.gmsh
 gmsh.initialize(append!(["gmsh"], ARGS))
 
 cd(@__DIR__)
-filename="../Dziuk_surf_meshes/Dzuik_mesh_9.msh"
+init_ref=0
+final_ref = 8
+
+
+filename="../Dziuk_surf_meshes/Dzuik_mesh_$(init_ref).msh"
 gmsh.open(filename)
 
-final_ref = 10
-for r in 1:10
+for r in init_ref+1:final_ref
     gmsh.model.mesh.refine()
     node_tags, node_coords = gmsh.model.mesh.getNodes()
     no_nodes = length(node_tags)
@@ -114,8 +117,9 @@ for r in 1:10
     lloyded_vertices = surface_lloyd(vertices, triangles)
             
     if r<=5
-        for i in 1:length(lloyded_vertices)
-            if abs(lloyded_vertices[i])<1e-15
+        n_v = length(lloyded_vertices)
+        for i in 1:n_v
+            if abs(lloyded_vertices[i])<1e-18
                 lloyded_vertices[i]=0.0
             end
         end

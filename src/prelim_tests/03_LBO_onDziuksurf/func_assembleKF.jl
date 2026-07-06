@@ -26,7 +26,7 @@ end
 
 function assemble_globalKF(dh::Ferrite.DofHandler, cv::SurfaceCellValues, func_rhs::Function)
     ndofs = Ferrite.ndofs(dh)
-    K = zeros(ndofs, ndofs)
+    K = spzeros(ndofs, ndofs)
     f = zeros(ndofs)
 
     no_bfs = Ferrite.getnbasefunctions(cv)
@@ -53,56 +53,4 @@ function assemble_globalKF(dh::Ferrite.DofHandler, cv::SurfaceCellValues, func_r
     end
 
     return K, f
-end
-
-
-function assemble_integral_uh(
-    cv::SurfaceCellValues,
-    uₕ::Vector
-    )
-    no_bfs = Ferrite.getnbasefunctions(cv)
-    uₑ = zeros(no_bfs)
-    fill!(uₑ, 0.0)
-    for q in 1:Ferrite.getnquadpoints(cv)
-        dΩ_q = getdetJdV(cv, q) # √det(G) * w_q
-        x = cv.mapping.x[q]
-
-        u_q = 0.0
-        for j in 1:no_bfs
-            φⱼ = Ferrite.shape_value(cv, q, j)
-            u_q += uₕ[j] * φⱼ
-        end
-
-        for i in 1:no_bfs
-            φᵢ = Ferrite.shape_value(cv, q, i)
-            uₑ[i] += u_q * φᵢ * dΩ_q
-        end
-    end
-    return uₑ
-end
-
-function assemble_integral_global_uh(dh::Ferrite.DofHandler, cv::SurfaceCellValues, uₕ::Vector)
-    ndofs = Ferrite.ndofs(dh)
-    U = zeros(ndofs)
-
-    no_bfs = Ferrite.getnbasefunctions(cv)
-
-    uₑ = zeros(no_bfs)
-
-    for cell in Ferrite.CellIterator(dh)
-        Ferrite.reinit!(cv, cell)
-
-        # compute local element matrix/vector
-        uₑ = assemble_integral_uh(cv, uₕ[celldofs(cell)])
-
-        # global dof indices for this cell
-        dofs = Ferrite.celldofs(cell)
-
-        for i in 1:no_bfs
-            gi = dofs[i]
-            U[gi] += uₑ[i]
-        end
-    end
-
-    return U
 end
