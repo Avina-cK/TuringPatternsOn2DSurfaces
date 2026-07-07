@@ -60,43 +60,6 @@ function ∇ₛ(u::Function, d::Function; outputfile::Bool=false, opfilename::St
 end
 
 """
-Δₛ(u::Function, d::Function)
-    - u(x,y,z) is the function for which we want to compute the tangential gradient
-    - d(x,y,z) is the level set function that defines the surface (d=0 on the surface)
-    The function returns a callable that computes the Laplace-Beltrami operator on u at any point (x,y,z).
-The Laplace-Beltrami operator on u (on a surface, d=0) is given by:
-    Δₛu = ∇ₛ ⋅ ∇ₛ(u)
-Example:
-    d(x,y,z) = z^2 + y^2 + (x - z^2)^2 - 1.0
-    u(x,y,z) = x*y
-    Δₛ_u_given = Δₛ(u, d)
-    Δₛ_u_given(0.0, -0.50, -1.0)
-Then you can evaluate ∇ₛ_u_given at any point (x,y,z) to get the value of the tangential gradient at that point.
-"""
-function Δₛ(u::Function, d::Function; outputfile::Bool=false, opfilename::String="func_tangrad.jl")
-    u_sym = u(sym_x₁, sym_x₂, sym_x₃)
-    d_sym = d(sym_x₁, sym_x₂, sym_x₃)
-    gradu = Symbolics.gradient(u_sym, [sym_x₁, sym_x₂, sym_x₃])
-    gradd = Symbolics.gradient(d_sym, [sym_x₁, sym_x₂, sym_x₃])
-    norm_n = sqrt(sum(gradd.^2))
-    n = gradd ./ norm_n
-    TG_sym = gradu .- (sum(gradu .* n) .* n)
-
-    # Compute jacobian of tangential gradient
-    JTG_sym = Symbolics.jacobian(TG_sym, [sym_x₁, sym_x₂, sym_x₃])
-    Δₛ_sym = JTG_sym[1,1] + JTG_sym[2,2] + JTG_sym[3,3]  # trace = divergence
-
-    Δₛ_func,_ = build_function(Δₛ_sym, sym_x₁, sym_x₂, sym_x₃;
-                                 expression = Val{false}
-                                 , simplify=Val{true}
-                                 , target=Symbolics.JuliaTarget())
-    if outputfile
-        write(opfilename, string(Δₛ_func))
-    end
-   return (x,y,z) -> Δₛ_func(x,y,z)
-end
-
-"""
 negΔₛ(u::Function, d::Function)
     - u(x,y,z) is the function for which we want to compute the tangential gradient
     - d(x,y,z) is the level set function that defines the surface (d=0 on the surface)
@@ -133,6 +96,7 @@ function negΔₛ(u::Function, d::Function, opfilename::String="cfunc_negLBO.jl"
 
     #Δₛu = ∇ₛ ⋅ v = (∇⋅v) - ∑ⱼ₌₁³((∇vⱼ ⋅ n)nⱼ)
     Δₛu_sym = div_v_sym - (w₁_sym + w₂_sym + w₃_sym)
+    
     nΔₛ_sym = -Δₛu_sym
     #nΔₛ_sym = Symbolics.expand(nΔₛ_sym)
     nΔₛ_expr = build_function(nΔₛ_sym, sym_x₁, sym_x₂, sym_x₃;
@@ -149,6 +113,7 @@ end
 @info "Loaded symbolically defined functions: normal_atpt(d), ∇ₛ(u,d) and Δₛ(u,d)."
 
 # De-comment the following if you want to (re-)generate functions for the Dzuik surface and given u
+#=
 include("func_DzuikSurface.jl")
 
 function u_chosen(x,y,z)
@@ -158,5 +123,4 @@ cd(@__DIR__)
 #∇ₛu_chosen = ∇ₛ(u_chosen, Dziuk_surface; outputfile=true, opfilename="cfunc_tangrad.jl")
 #Δₛu_chosen = Δₛ(u_chosen, Dziuk_surface; outputfile=true, opfilename="cfunc_LBO.jl")
 negΔₛu_chosen = negΔₛ(u_chosen, Dziuk_surface, "cfunc_negLBO.jl")
-
-
+=#

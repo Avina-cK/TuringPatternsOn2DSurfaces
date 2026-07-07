@@ -1,6 +1,9 @@
 include("final_sim_func.jl")
 
+cd(@__DIR__)
+cd("results/")
 Refs = [0,1,2,3,4,5, 6, 7, 8]
+nonodes = [6, 18, 66, 258, 1026, 4098, 16386, 65538, 262146]
 n_refs = length(Refs)
 Hs = zeros(n_refs)
 L2_errors = copy(Hs)
@@ -17,8 +20,8 @@ EOCs = [NaN; EOCs]
 ## Display results
 
 using PrettyTables
-pretty_table([Refs Hs L2_errors EOCs]; 
-            column_labels= ["Refinement", "Mesh Size", "L2 Error", "EOC"],
+pretty_table([Refs nonodes Hs L2_errors EOCs]; 
+            column_labels= ["Ref.", "# Nodes", "Mesh Size", "L2 Error", "EOC"],
             source_notes = "-Δₛu = f on the Dzuik surface. uₜᵣᵤₑ(x, y, z) = xy",
             #backend = :markdown
             )
