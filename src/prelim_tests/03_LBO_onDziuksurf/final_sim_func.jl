@@ -68,7 +68,7 @@ function solve_LB_eq_on_Dzuiksurf(refinement)
     # should be very small, according to Dzuik (2013)
 
     ## Compute the true solution
-    u_ex = assemble_trueU_nodal(dh, cellvalues_Ω, u_chosen)
+    u_ex = assemble_trueU_nodal(cellvalues_Ω, dh, u_chosen)
 
     ## Compute L2 error against true solution
     u_err = u_h .- u_ex

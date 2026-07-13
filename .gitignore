@@ -9,12 +9,6 @@ src/sphere_meshes/embedded_sphere_3.msh
 src/sphere_meshes/embedded_sphere_4.msh
 src/sphere_meshes/embedded_sphere_5.msh
 src/Dzuik_surf_meshes/
-lowresmesh_0.msh
-test.msh
-src/Dziuk_surf_meshes/Dzuik_mesh_0.msh
-src/Dziuk_surf_meshes/Dzuik_mesh_1.msh
-src/Dziuk_surf_meshes/Dzuik_mesh_2.msh
-src/Dziuk_surf_meshes/Dzuik_mesh_3.msh
 src/Dziuk_surf_meshes/Dzuik_mesh_4.msh
 src/Dziuk_surf_meshes/Dzuik_mesh_5.msh
 src/Dziuk_surf_meshes/Dzuik_mesh_6.msh
@@ -35,3 +29,5 @@ src/prelim_tests/03_LBO_onDziuksurf/results/surface_laplace_Dzuik_surf_5.vtu
 src/prelim_tests/03_LBO_onDziuksurf/results/surface_laplace_Dzuik_surf_6.vtu
 src/prelim_tests/03_LBO_onDziuksurf/results/surface_laplace_Dzuik_surf_7.vtu
 src/prelim_tests/03_LBO_onDziuksurf/results/surface_laplace_Dzuik_surf_8.vtu
+src/prelim_tests/04_THE_onDzuiksurf/results/*.vtu
+src/prelim_tests/04_THE_onDzuiksurf/results/*.pvd
