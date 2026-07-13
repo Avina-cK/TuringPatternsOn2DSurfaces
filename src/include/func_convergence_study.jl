@@ -44,5 +44,5 @@ function convergence_study(sim_func::Function, refinements::AbstractVector{Int},
 
     end
     
-    return [refs, hs, Δt, errs], eoc, T_sim
+    return [refs, hs, Δt, errs, eoc, T_sim]
 end

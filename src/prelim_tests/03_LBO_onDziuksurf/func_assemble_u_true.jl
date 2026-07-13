@@ -1,4 +1,4 @@
-function assemble_trueU_nodal(dh::Ferrite.DofHandler, cv::SurfaceCellValues, u_true::Function)
+function assemble_trueU_nodal(cv::SurfaceCellValues, dh::Ferrite.DofHandler, u_true::Function)
     ndofs = Ferrite.ndofs(dh)
     u = fill(NaN, ndofs)   # NaN sentinel: "not yet filled"
     no_bfs = Ferrite.getnbasefunctions(cv)

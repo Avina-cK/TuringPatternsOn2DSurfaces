@@ -21,15 +21,15 @@ f_{rhs}(x,y,z) = 2z
 |            2 |      0.118748 |   0.00424571 | 1.99383 |
 |            3  |     0.0594263 |   0.00106472 | 1.99807 |
 
-![results-L2_err-vs-h](results-L2_err-vs-h.png) ![results-L2_err-vs-h](results-log_L2_err-vs-log_h.png) 
+![results-L2_err-vs-h](results/results-L2_err-vs-h.png) ![results-L2_err-vs-h](results/results-log_L2_err-vs-log_h.png) 
 
 ## Implementation
 
 ### Mesh generation
-The spherical meshes were created using Gmsh (See [include/gen_sphere.jl](../../../include/gen_sphere.jl))
+The spherical meshes were created using Gmsh (See [include/gen_sphere.jl](../../include/gen_sphere.jl))
 
 ### Error calculation
-See [documentation](../../../include/README.md#error_funcs_readme) for [include/funcs_error_analysis.jl](../../../include/funcs_error_analysis.jl)
+See [documentation](../../include/README.md#error_funcs_readme) for [include/funcs_error_analysis.jl](../../include/funcs_error_analysis.jl)
 
 ### final_sim_results.jl
 Taking the set of refinement levels $ref \in\{0,1,2,3\}$, spheres of these refinement levels are created and this file solves $-\Delta_{S}u = f$ on spherical meshes, $\Omega_{h}$, and outputs the results as a table containing the following:

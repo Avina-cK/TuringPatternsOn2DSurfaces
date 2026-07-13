@@ -92,7 +92,7 @@ function sim_THE_onDziuksurf(refinement::Int, T::Float64, Δt::Float64, k_given:
 
         sol = Aₕ_F \ rhs
         uₙ₊₁ = sol[1:n_dofs]
-        λ    = sol[end]
+        #λ    = sol[end]
         uₙ .= uₙ₊₁
 
         # true solution and error at this timestep
@@ -133,3 +133,6 @@ function sim_THE_onDziuksurf(refinement::Int, T::Float64, Δt::Float64, k_given:
 
     return refinement, h, L2error
 end
+
+## Example: refinement=2, Time to run simulation=2π, Δt=0.04, k=1.0, tosavesol=true
+#sim_THE_onDziuksurf(2, 2.0*π, 0.04, 1.0; tosavesol=true)
