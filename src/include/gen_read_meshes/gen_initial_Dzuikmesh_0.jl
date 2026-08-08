@@ -43,7 +43,7 @@ gmsh.model.mesh.addElements(2, 1,
 
 # Write mesh into file
 cd(@__DIR__)
-gmsh.write("../Dziuk_surf_meshes/Dzuik_mesh_0.msh")
+gmsh.write("../../Dziuk_surf_meshes/Dzuik_mesh_0.msh")
 
 # finalise and close gmsh
 gmsh.finalize()

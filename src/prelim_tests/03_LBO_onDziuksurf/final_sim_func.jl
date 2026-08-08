@@ -3,7 +3,7 @@ using Ferrite, Tensors, SparseArrays
 using WriteVTK
 
 include("surface_cell_values.jl")
-include("../../include/read_Dzuik_mesh.jl")
+include("../../include/gen_read_meshes/func_load_tri_surfmesh.jl")
 include("../../include/funcs_error_analysis.jl")
 include("../../include_wip/check_mesh.jl")
 
@@ -18,7 +18,7 @@ function solve_LB_eq_on_Dzuiksurf(refinement)
     filename = "Dzuik_mesh_$(refinement).msh"
     cd(@__DIR__)
     cd("../../Dziuk_surf_meshes/")
-    Ωₕ, h = load_Dzuik_mesh(filename)
+    Ωₕ, h = load_tri_surfmesh(filename)
 
     @info "Grid imported for refinement level $refinement"
     cd(@__DIR__)

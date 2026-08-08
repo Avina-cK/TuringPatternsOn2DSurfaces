@@ -1,10 +1,14 @@
 using Gmsh.gmsh
 using FerriteGmsh
 
-#mesh_file="C:/Users/avina/Documents/GithubRepositories/TuringPatternsOn2DSurfaces/src/Dziuk_surf_meshes/lowresmesh_1.msh"
 include("func_mesh_size.jl")
 
-function load_Dzuik_mesh(mesh_file)
+"""
+    load_tri_surfmesh(mesh_file) -> Ω::Ferrite.Grid, max_edge_length::Float64
+
+Read a triangular surface mesh into a Ferrite.Grid format and calculate its mesh size.
+"""
+function load_tri_surfmesh(mesh_file)
 
     gmsh.isInitialized()!=0 && gmsh.finalize()
     gmsh.initialize()

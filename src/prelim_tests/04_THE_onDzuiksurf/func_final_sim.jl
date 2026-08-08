@@ -10,7 +10,7 @@ using Gmsh.gmsh
 using WriteVTK # for output
 
 include("../../include/surface_cell_values.jl")
-include("../../include/read_Dzuik_mesh.jl")
+include("../../include/gen_read_meshes/func_load_tri_surfmesh.jl")
 include("../../include/funcs_error_analysis.jl")
 
 include("../../include/fem_assembly_funcs/func_assembleF.jl")
@@ -24,14 +24,16 @@ include("manufactured_sol.jl")
 #TODO: docstring
 """
     sim_THE_onDziuksurf(refinement::Int, T::Float64, Δt::Float64, k_given::Float64=1.0; tosavesol::Bool=false)
-
-TBW
+    
+Simulate the following PDE on a Dzuik surface mesh:
+    ∂ₜu - Δₛu = f on Ω
 """
-function sim_THE_onDziuksurf(refinement::Int, T::Float64, Δt::Float64, k_given::Float64=1.0; tosavesol::Bool=false)
+function sim_THE_onDziuksurf(refinement::Int, T::Float64, Δt::Float64, k_given::Float64=1.0;
+                             tosavesol::Bool=false)
     filename = "Dzuik_mesh_$(refinement).msh"
     cd(@__DIR__)
     cd("../../Dziuk_surf_meshes/")
-    Ωₕ, h = load_Dzuik_mesh(filename)
+    Ωₕ, h = load_tri_surfmesh(filename)
 
     @info "Grid imported for refinement level $refinement"
     cd(@__DIR__)

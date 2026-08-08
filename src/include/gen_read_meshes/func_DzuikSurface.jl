@@ -5,6 +5,7 @@ pages 142–155. Springer Berlin Heidelberg, Berlin, Heidelberg, 1988.
 =#
 """
 Dziuk_surface(x,y,z) -> dₛ::Float64
+    dₛ(x,y,z) = z² + y² + (x - z²)² - 1
 """
 function Dziuk_surface(x,y,z)
     return z^2 + y^2 + (x - z^2)^2 - 1.0
@@ -12,6 +13,9 @@ end
 
 """
 gradDziuk_surface(x,y,z) -> (∇d₁, ∇d₂, ∇d₃)::Tuple{Float64, Float64, Float64}
+    ⌈ ∇d₁ ⌉     ⌈ 2(x - z²)       ⌉
+    | ∇d₂ | =  | 2y              |
+    ⌊ ∇d₃ ⌋     ⌊ 2z - 4z(x - z²) ⌋       
 """
 function gradDziuk_surface(x,y,z)
     gx = 2.0 *(x - z^2)

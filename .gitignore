@@ -31,3 +31,14 @@ src/prelim_tests/03_LBO_onDziuksurf/results/surface_laplace_Dzuik_surf_7.vtu
 src/prelim_tests/03_LBO_onDziuksurf/results/surface_laplace_Dzuik_surf_8.vtu
 src/prelim_tests/04_THE_onDzuiksurf/results/*.vtu
 src/prelim_tests/04_THE_onDzuiksurf/results/*.pvd
+
+src/prelim_tests/05_GrayScott_onSphere/results/*.pvd
+src/prelim_tests/05_GrayScott_onSphere/results/*.vtu
+src/prelim_tests/05_GrayScott_onSphere/results/*/*.pvd
+src/prelim_tests/05_GrayScott_onSphere/results/*/*.vtu
+
+src/prelim_tests/06_GrayScott_DzuikSurface/results/*.pvd
+src/prelim_tests/06_GrayScott_DzuikSurface/results/*.vtu
+
+src/prelim_tests/06_GrayScott_DzuikSurface/results/*/*.vtu
+src/prelim_tests/06_GrayScott_DzuikSurface/results/*/*.pvd

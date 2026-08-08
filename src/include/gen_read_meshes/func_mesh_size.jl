@@ -1,5 +1,12 @@
 # To use only inside an open Gmsh instance
 using LinearAlgebra
+
+"""
+    mesh_size() -> max_len::Float64
+
+    measures the maximum edge length of the mesh.
+    To use only inside an open Gmsh instance.
+"""
 function mesh_size()
     node_tags, node_coords, _ = gmsh.model.mesh.getNodes()
     etypes, _, enodes = gmsh.model.mesh.getElements(2)

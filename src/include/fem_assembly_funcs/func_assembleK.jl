@@ -1,3 +1,4 @@
+include("func_assembleKe.jl")
 """
 assemble_globalK(cv::SurfaceCellValues, dh::Ferrite.DofHandler; k::Float64=1.0)
 Assemble global stiffness matrix K that corresponds to the weak form
@@ -17,17 +18,7 @@ function assemble_globalK(cv::SurfaceCellValues, dh::Ferrite.DofHandler; k::Floa
         
         # Assemble elemental stiffness matrix Kₑ
         # ∫ k(∇φᵢ ⋅ ∇φⱼ) * dΩ_q
-        fill!(Kₑ, 0.0)
-        for q in 1:Ferrite.getnquadpoints(cv)
-            dΩ_q = getdetJdV(cv, q)
-            for i in 1:no_bfs
-                ∇φᵢ = Ferrite.shape_gradient(cv, q, i)
-                for j in 1:no_bfs
-                    ∇φⱼ = Ferrite.shape_gradient(cv, q, j)
-                    Kₑ[i,j] += k * (∇φᵢ ⋅ ∇φⱼ) * dΩ_q
-                end
-            end
-        end
+        Kₑ = assemble_elementK(Kₑ, cv; k=k)
 
         dofs = Ferrite.celldofs(cell)
         for i in 1:no_bfs

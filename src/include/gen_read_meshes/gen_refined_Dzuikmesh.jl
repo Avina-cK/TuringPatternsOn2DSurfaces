@@ -2,14 +2,29 @@
 using LinearAlgebra
 include("../include/func_DzuikSurface.jl")
 
-function project_to_surf(x,y,z; max_iters=200, tol=1e-15)
+"""
+Project to surface
+    project_to_surf(x,y,z; max_iters=200, tol=1e-15, 
+                dist_func::Function=Dziuk_surface,
+                grad_func::Function=gradDziuk_surface)
+- `x,y,z` : coordinates of points to project onto surface
+- `max_iters` : maximum number of iterations to run projection
+- `tol` : how close to the surface is close enough
+- `dist_func` : distance function describing implicit surface
+- `grad_func` : gradient of dist_func
+"""
+function project_to_surf(
+    x,y,z; max_iters::Int=200, tol=1e-15,
+    dist_func::Function=Dziuk_surface,
+    grad_func::Function=gradDziuk_surface
+    )
     px,py,pz = x,y,z
     for _ in 1:max_iters
-        d_ist = Dziuk_surface(px,py,pz)
+        d_ist = dist_func(px,py,pz)
         if abs(d_ist) < tol
             break 
         end
-        gx,gy,gz = gradDziuk_surface(px,py,pz)
+        gx,gy,gz = grad_func(px,py,pz)
         norm_gₛ = gx^2 + gy^2 + gz^2
         px -= d_ist/norm_gₛ * gx
         py -= d_ist/norm_gₛ * gy
@@ -89,7 +104,7 @@ init_ref=0
 final_ref = 8
 
 
-filename="../Dziuk_surf_meshes/Dzuik_mesh_$(init_ref).msh"
+filename="../../Dziuk_surf_meshes/Dzuik_mesh_$(init_ref).msh"
 gmsh.open(filename)
 
 for r in init_ref+1:final_ref
@@ -131,7 +146,7 @@ for r in init_ref+1:final_ref
     end
 
     cd(@__DIR__)
-    gmsh.write("../Dziuk_surf_meshes/Dzuik_mesh_$(r).msh")
+    gmsh.write("../../Dziuk_surf_meshes/Dzuik_mesh_$(r).msh")
 
 end
 

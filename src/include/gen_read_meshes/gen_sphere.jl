@@ -27,7 +27,7 @@ function create_embedded_sphere(refinements; tosave=false)
     return Ω, max_edge_length
 end
 
-function load_sphere(refinements, dir_to_spheres="../sphere_meshes")
+function load_sphere(refinements, dir_to_spheres="../../sphere_meshes")
     gmsh.initialize()
     gmsh.open("$(dir_to_spheres)/embedded_sphere_$(refinements).msh")
     nodes = tonodes()
