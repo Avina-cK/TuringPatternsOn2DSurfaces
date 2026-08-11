@@ -64,7 +64,7 @@ function sim_gs_on_sphere(given_m::GrayScottMaterial{Float64}=given_m_default,
     ## Save solutions
     if savesol
         cd(@__DIR__)
-        fts(x) = replace(string(x), "." => "-")
+        fts(x) = replace(string(x), "." => "-") #float to string
         basefolder_name = "GS_Sphere_$(refinement)_$(fts(Du))_$(fts(Dv))_$(fts(α))_$(fts(β))"
         mkpath("results/$(basefolder_name)")
         cd("results/$(basefolder_name)/")
@@ -98,6 +98,10 @@ function sim_gs_on_sphere(given_m::GrayScottMaterial{Float64}=given_m_default,
             end
             @info "Step $(t)/$(T)"
         end
+        if any(isnan.(uₜ))
+            @error "NaN detected in solution at step $(iₜ), t = $(t)"
+            break
+        end
         if isapprox(uₜ, uₜ₋₁; rtol=1e-8, atol=1e-10)
             @info "Converged at step $(iₜ), t = $(t)"
             break
@@ -112,6 +116,6 @@ function sim_gs_on_sphere(given_m::GrayScottMaterial{Float64}=given_m_default,
 end
 
 
-given_m_2 = GrayScottMaterial{Float64}(0.00016, 0.00008, 0.042, 0.062)
+given_m_2 = GrayScottMaterial{Float64}(0.00016, 0.00008, 0.064, 0.062)
 
 sim_gs_on_sphere(given_m_2)
