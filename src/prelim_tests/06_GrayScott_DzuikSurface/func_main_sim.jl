@@ -15,15 +15,19 @@ include("../../include/struct_GrayScott.jl")
 
 include("func_assemble_matrices.jl")
 include("func_assemble_initial_cond.jl")
-
+include("save_load_state.jl")
 
 given_m_default = GrayScottMaterial{Float64}(0.00016, 0.00008, 0.06, 0.062)
 dir_to_meshes_default = "../../Dziuk_surf_meshes"
 
+fts(x) = replace(string(x), "." => "-") #float to string
+
 function sim_gs_on_Dziukmesh(given_m::GrayScottMaterial{Float64}=given_m_default,
                         refinement::Int=4, Δt::Float64=1.0, T::Float64=50000.0,
                         savesol::Bool=true, no_frames_to_save::Int=100,
-                        dir_to_meshes::String=dir_to_meshes_default
+                        dir_to_meshes::String=dir_to_meshes_default;
+                        restart_from::Union{Nothing,String}=nothing,
+                        
     )
         
     nsteps = ceil(Int, T/Δt) 
@@ -55,27 +59,41 @@ function sim_gs_on_Dziukmesh(given_m::GrayScottMaterial{Float64}=given_m_default
     ## initial condition
     uₜ = zeros(ndofs(dh))
     uₜ₋₁ = zeros(ndofs(dh))
-    setup_initial_conditions!(uₜ₋₁, cellvalues_Ω, dh)
+    restarted = restart_from !== nothing
+    if restarted
+        cd(@__DIR__)
+        uₜ₋₁, t_start, iter_start = load_state(restart_from)
+        @assert length(uₜ₋₁) == ndofs(dh) "Loaded state does not match the number of degrees of freedom in the mesh."
+        @info "Restarting from $(restart_from) at t=$(t_start), iter=$(iter_start)"
+    else
+        t_start::Float64=0.0, iter_start::Int=0
+        setup_initial_conditions!(uₜ₋₁, cellvalues_Ω, dh)
+    end
 
     ## Save solutions
     if savesol
         cd(@__DIR__)
-        fts(x) = replace(string(x), "." => "-") #float to string
         basefolder_name = "GS_Dziuk_surf_$(refinement)_$(fts(Du))_$(fts(Dv))_$(fts(α))_$(fts(β))"
         mkpath("results/$(basefolder_name)")
         cd("results/$(basefolder_name)/")
         basefile_name = "GS_Dziuk_surf"
-        pvd = paraview_collection("$(basefile_name)")
-        VTKGridFile("$(basefile_name)-0", dh) do vtk
-            write_solution(vtk, dh, uₜ₋₁, "_h")
-            pvd[0.0] = vtk
+        pvd = paraview_collection("$(basefile_name)"; append=restarted)
+
+        if !restarted
+            VTKGridFile("$(basefile_name)-0", dh) do vtk
+                write_solution(vtk, dh, uₜ₋₁, "_h")
+                pvd[0.0] = vtk
+            end
         end
     end
 
     ## main loop
+    iₜ_final = iter_start
+    t_final = t_start
 
-    for (iₜ, t) in enumerate(Δt:Δt:T)
-
+    for (iₜ_r, t_r) in enumerate(Δt:Δt:T)
+        iₜ = iter_start + iₜ_r
+        t = t_start + t_r
         # solve main heat problem ()
         uₜ .= cholA \ (M * uₜ₋₁)
 
@@ -87,12 +105,13 @@ function sim_gs_on_Dziukmesh(given_m::GrayScottMaterial{Float64}=given_m_default
             rvₜ[1, i] += Δt * reaction1(u, v, α, β)
             rvₜ[2, i] += Δt * reaction2(u, v, α, β)
         end
-        if iₜ % save_every == 0
+        iₜ_final, t_final = iₜ, t
+        if iₜ_r % save_every == 0
             VTKGridFile("$(basefile_name)-$(iₜ)", dh) do vtk
                 write_solution(vtk, dh, uₜ, "_h")
                 pvd[t] = vtk
             end
-            @info "Step $(t)/$(T)"
+            @info "Step $(t)/$(t_start + T)"
         end
         if any(isnan.(uₜ))
             @error "NaN detected in solution at step $(iₜ), t = $(t)"
@@ -108,13 +127,13 @@ function sim_gs_on_Dziukmesh(given_m::GrayScottMaterial{Float64}=given_m_default
         end
         uₜ₋₁ .= uₜ
     end
-    close(pvd)
+    if savesol
+        close(pvd)
+        # always persist final state for a future restart, regardless of exit reason
+        save_state(uₜ₋₁, t_final, iₜ_final, "$(basefile_name)_state_$(iₜ_final).jld2")
+    end
     @info "Gray-Scott simulation completed on Dziuk surface."
     @info "Refinement: $(refinement)"
     @info "Parameters: Du=$(Du), Dv=$(Dv), α=$(α), β=$(β)"
     cd(@__DIR__)
 end
-
-given_m_2 = GrayScottMaterial{Float64}(0.00016, 0.00008, 0.045, 0.062)
-
-sim_gs_on_Dziukmesh(given_m_2, 6, 1.0, 10000.0)

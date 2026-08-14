@@ -1,6 +1,5 @@
 function assemble_element_mass!(Me::Matrix, cellvalues)
     n_basefuncs = getnbasefunctions(cellvalues)
-    # The mass matrices between the reactions are not coupled, so we get a blocked-strided matrix.
     num_reactants = 2
     r₁range = 1:num_reactants:(num_reactants * n_basefuncs)
     r₂range = 2:num_reactants:(num_reactants * n_basefuncs)
