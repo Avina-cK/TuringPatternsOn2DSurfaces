@@ -27,6 +27,7 @@ function sim_gs_on_Dziukmesh(given_m::GrayScottMaterial{Float64}=given_m_default
                         savesol::Bool=true, no_frames_to_save::Int=100,
                         dir_to_meshes::String=dir_to_meshes_default;
                         restart_from::Union{Nothing,String}=nothing,
+                        init_const=[0.0; 0.0]
                         
     )
         
@@ -66,8 +67,13 @@ function sim_gs_on_Dziukmesh(given_m::GrayScottMaterial{Float64}=given_m_default
         @assert length(uₜ₋₁) == ndofs(dh) "Loaded state does not match the number of degrees of freedom in the mesh."
         @info "Restarting from $(restart_from) at t=$(t_start), iter=$(iter_start)"
     else
-        t_start::Float64=0.0, iter_start::Int=0
-        setup_initial_conditions!(uₜ₋₁, cellvalues_Ω, dh)
+        t_start=0.0
+        iter_start=0
+        if init_const==[0.0; 0.0]
+            setup_initial_conditions!(uₜ₋₁, cellvalues_Ω, dh)
+        else
+            setup_const_init_conditions!(uₜ₋₁, cellvalues_Ω, dh, init_const)
+        end
     end
 
     ## Save solutions

@@ -56,3 +56,21 @@ function setup_initial_conditions!(u₀::Vector, cellvalues, dh::DofHandler)
     u₀ .+= 0.01 * rand(ndofs(dh))
     return
 end;
+
+function setup_const_init_conditions!(u₀::Vector, cellvalues, dh::DofHandler, uv_const)
+    u_const = uv_const[1]
+    v_const = uv_const[2]
+    n_basefuncs = getnbasefunctions(cellvalues)
+    for cell in CellIterator(dh)
+        reinit!(cellvalues, cell)
+        dofs = celldofs(cell)
+        uₑ = @view u₀[dofs]
+        rv₀ₑ = reshape(uₑ, (2, n_basefuncs))
+        for i in 1:n_basefuncs
+            rv₀ₑ[1, i] = u_const
+            rv₀ₑ[2, i] = v_const
+        end
+    end
+    u₀ .+= 0.01 * rand(ndofs(dh))
+    return
+end;
