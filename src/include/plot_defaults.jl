@@ -1,4 +1,4 @@
-using Plots
+using Plots, LaTeXStrings, Colors
 default(
     titlefont=(10,"Computer Modern"),
     guidefont ="Computer Modern",

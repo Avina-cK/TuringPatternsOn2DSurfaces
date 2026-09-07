@@ -51,3 +51,8 @@ src/prelim_tests/06_GrayScott_DzuikSurface/results/*/*/*.pvd
 src/prelim_tests/06_GrayScott_DzuikSurface/results/*/*/*.jld2
 
 src/illustrations/
+
+src/include_wip/
+src/prelim_tests/06_GrayScott_DzuikSurface/results/final_states/
+src/prelim_tests/06_GrayScott_DzuikSurface/results/good/
+src/prelim_tests/05_GrayScott_onSphere/results/

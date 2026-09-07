@@ -42,6 +42,82 @@ function J2(a,b)
     return Jacob
 end
 
+## Helper functions
+function classify_real_complex_patterns(Z)
+    Z_prop = Array{Int}(undef, size(Z))
+
+    for i in eachindex(Z)
+        r = Z[i]
+        r1, r2 = r[1], r[2]
+        re1, re2 = real(r1), real(r2)
+        im1, im2 = imag(r1), imag(r2)
+
+        if im1 == 0 && im2 == 0
+            # purely real
+            if re1 > re2 && re2 > 0
+                Z_prop[i] = 6
+            elseif re2 > re1 && re1 > 0
+                Z_prop[i] = 6
+            elseif re2 < re1 && re2 < 0 && re1 < 0
+                Z_prop[i] = -6
+            elseif re1 < re2 && re1 < 0 && re2 < 0
+                Z_prop[i] = -6
+            elseif re2 < 0 && re1 > 0
+                Z_prop[i] = 2
+            elseif re1 < 0 && re2 > 0
+                Z_prop[i] = 2
+            elseif re1 == re2 && re1 > 0
+                Z_prop[i] = 4
+            elseif re1 == re2 && re1 < 0
+                Z_prop[i] = -4
+            else
+                Z_prop[i] = -2 #r1=r2=0
+            end
+        else
+            # complex numbers
+            if re1 > re2 && re2 > 0
+                Z_prop[i] = 5
+            elseif re2 > re1 && re1 > 0
+                Z_prop[i] = 5
+            elseif re2 < re1 && re2 < 0 && re1 < 0
+                Z_prop[i] = -5
+            elseif re1 < re2 && re1 < 0 && re2 < 0
+                Z_prop[i] = -5
+            elseif re2 < 0 && re1 > 0
+                Z_prop[i] = 1
+            elseif re1 < 0 && re2 > 0
+                Z_prop[i] = 1
+            elseif re1 == re2 && re1 > 0
+                Z_prop[i] = 3
+            elseif re1 == re2 && re1 < 0
+                Z_prop[i] = -3
+            else
+                Z_prop[i] = -1 # catch other complex cases
+            end
+        end
+    end
+    return Z_prop
+end
+
+function round_complex_matrix!(Z, precision::Float64=1.0e-4)
+    for i in eachindex(Z)
+        Z[i] = ComplexF64[
+            complex(round(real(z), digits=8), round(imag(z), digits=4)) for z in Z[i]
+        ]
+    end
+    return Z
+end
+function find_valid_integers(M::AbstractMatrix{<:Integer})
+    allowed = Set(-6:-1) ∪ Set(1:6)   # {-6,...,-1,1,...,6}, excludes 0
+    found = Set{Int}()
+    for x in M
+        if x in allowed
+            push!(found, x)
+        end
+    end
+    return sort(collect(found))
+end
+
 
 les7 = cgrad([colorant"rgb(213, 45, 0)"
                     , colorant"rgb(239, 118, 39)"
