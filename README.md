@@ -36,9 +36,7 @@ WORK IN PROGRESS
 ## About The Project
 An investigation of turing patterns on (no-boundary, smooth) 2D manifolds (in 3D space) using numerical (FEM) and analytical methods.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
+<!-- <p align="right">(<a href="#readme-top">back to top</a>)</p> -->
 
 ### Built With
 
@@ -47,11 +45,17 @@ An investigation of turing patterns on (no-boundary, smooth) 2D manifolds (in 3D
   *  [Symbolics.jl](https://github.com/JuliaSymbolics/Symbolics.jl)
 * [Gmsh](Gmsh-url)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<!-- <p align="right">(<a href="#readme-top">back to top</a>)</p> -->
 
 <!-- PROGRESS -->
 ## Progress so far
-- Solved stationary heat equation on sphere. (See [02_LBO_onSphere](https://github.com/Avina-cK/TuringPatternsOn2DSurfaces/tree/main/src/prelim_tests/02_LBO_onSphere))
+- Preliminary simulation tests:
+  - Simulated and reproduced known results of the Schnakenberg system on a sphere
+  - Simulated Gray-Scott (GS) system on the Dziuk surface
+  - Simulated Gray-Scott system on a sphere
+  - Solved time-dependent heat equation on Dziuk surface
+  - Solved stationary heat equation on Dziuk surface
+  - Solved stationary heat equation on sphere (See [02_LBO_onSphere](https://github.com/Avina-cK/TuringPatternsOn2DSurfaces/tree/main/src/prelim_tests/02_LBO_onSphere))
 - Created refined meshes, using a manually initial mesh (4nodes-8triangles).
   - [function to generate meshes](https://github.com/Avina-cK/TuringPatternsOn2DSurfaces/blob/main/src/include/gen_lowresmesh_from0.jl)
   - [.msh files](https://github.com/Avina-cK/TuringPatternsOn2DSurfaces/tree/main/src/Dziuk_surf_meshes) 
@@ -60,7 +64,7 @@ An investigation of turing patterns on (no-boundary, smooth) 2D manifolds (in 3D
 <!--
 See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
 -->
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<!-- <p align="right">(<a href="#readme-top">back to top</a>)</p> -->
 
 
 
@@ -120,14 +124,18 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <!-- ROADMAP -->
 ## Next Steps
 
-- [ ] Test stationary equation solver on Dzuik surface.
-- [ ] Update documentation on simulating stationary heat equation on sphere.
+- Move Gray-Scott on Dziuk surface folder from prelim_tests to main
+- Write documentation for GS on Dziuk surface and pattern classification
+- Write/ Update documentation for
+  - GS on sphere
+  - Schnakenberg on sphere
+- Update references
 
 
 <!--
 See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
 -->
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<!-- <p align="right">(<a href="#readme-top">back to top</a>)</p> -->
 
 
 
@@ -160,9 +168,7 @@ Don't forget to give the project a star! Thanks again!
 
 Distributed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3. See `LICENSE.txt` for more information.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
+<!-- <p align="right">(<a href="#readme-top">back to top</a>)</p> -->
 
 <!-- CONTACT -->
 ## Contact
@@ -172,7 +178,7 @@ Author name: Avina Kalle
 
 Project Link: [https://github.com/Avina-cK/TuringPatternsOn2DSurfaces](https://github.com/Avina-cK/TuringPatternsOn2DSurfaces)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<!-- <p align="right">(<a href="#readme-top">back to top</a>)</p> -->
 
 ## Reference(s)
 Gerhard Dziuk. Finite Elements for the Beltrami operator on arbitrary surfaces, pages 142–155. Springer Berlin Heidelberg, Berlin, Heidelberg, 1988.
@@ -181,6 +187,7 @@ Gerhard Dziuk. Finite Elements for the Beltrami operator on arbitrary surfaces, 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
+* [Ekre, Fredrick](https://orcid.org/0000-0003-2476-5406); [Carlsson, Kristoffer](https://orcid.org/0000-0001-9092-3092) and [Ferrite.jl contributors](https://github.com/Ferrite-FEM/Ferrite.jl/graphs/contributors) for [Ferrite.jl](https://github.com/Ferrite-FEM/Ferrite.jl)
 * [Choose an Open Source License](https://choosealicense.com)
 * [Img Shields](https://shields.io)
 * Alan Turing

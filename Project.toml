@@ -22,7 +22,3 @@ VectorFieldPlots = "65c20475-cd4d-480f-b9de-e911d7154609"
 
 [workspace]
 projects = ["docs"]
-
-authors = [
-    {given-names = "Avina", family-names = "Kalle"}
-]
