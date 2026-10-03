@@ -121,7 +121,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 
 -->
 
-<!-- ROADMAP -->
+<!-- ROADMAP 
 ## Next Steps
 
 - Move Gray-Scott on Dziuk surface folder from prelim_tests to main
@@ -132,7 +132,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - Update references
 
 
-<!--
+
 See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
 -->
 <!-- <p align="right">(<a href="#readme-top">back to top</a>)</p> -->
