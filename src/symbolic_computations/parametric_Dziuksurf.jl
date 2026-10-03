@@ -97,3 +97,24 @@ sum_2e =  ((κ₁²)*∂detG∂x1) - (dot_XζXη*∂detG∂x2)
 
 ẽ = (1/detG)*(sum_dHe - 0.5*sum_2e)
 
+## Classification: 
+#=
+    b² - ac < 0 => elliptic
+    b² - ac = 0 => parabolic
+    b² - ac > 0 => hyperbolic
+=#
+
+disc = (b̃)^2 - ã*c̃
+disc_built = build_function(disc, ζ, η; expression=Val{false})
+
+using Plots
+
+Z = [disc_built(ζ, η) for η in η_range, ζ in ζ_range]
+
+heatmap(
+    ζ_range, η_range, Z;
+    xlabel = "ζ", ylabel = "η",
+    title = "disc_built(ζ, η)",
+    color = :thermal
+)
+# shows that equation is elliptic
