@@ -204,3 +204,19 @@ plt = plot(p_main, p_cbar
     )
 
 plt
+
+## Analytical curve functions
+
+include("../../include/plot_defaults.jl")
+α_SNC1(β) = (1/8)*(1 - (8*β) + sqrt(1 - (16*β)))
+α_SNC2(β) = (1/8)*(1 - (8*β) - sqrt(1 - (16*β)))
+α_HC(β) = 0.5*(sqrt(β) - (2*β) - sqrt(β*(1-(4*sqrt(β)))))
+βs = 0.0001:0.0001:0.0625
+
+plot(xlabel=L"\beta", ylabel=L"\alpha")
+plot!(βs, α_SNC1.(βs), label="Saddle-node", color=:black)
+plot!(βs, α_SNC2.(βs), label=false, color=:black)
+plot!(βs, α_HC.(βs), label="Hopf", color=:black, linestyle=:dash)
+scatter!([0.0625],[0.0625]
+        , label="(0.0625,0.0625)"
+        , marker=:circ, markercolor=:black, markersize=3)

@@ -1,4 +1,4 @@
-function setup_initial_conditions!(u₀::Vector, cellvalues, dh::DofHandler)
+function setup_polar_initial_conditions!(u₀::Vector, cellvalues, dh::DofHandler; noise_amp::Float64=0.01)
     u₀ .= ones(ndofs(dh))
     u₀[2:2:end] .= 0.0
     n_basefuncs = getnbasefunctions(cellvalues)
@@ -15,6 +15,7 @@ function setup_initial_conditions!(u₀::Vector, cellvalues, dh::DofHandler)
             end
         end
     end
-    u₀ .+= 0.01 * rand(ndofs(dh))
+    Random.seed!(314)
+    u₀ .+= noise_amp * rand(ndofs(dh))
     return
 end;

@@ -1,7 +1,7 @@
 cd(@__DIR__)
 using RuntimeGeneratedFunctions
 using NaNMath
-include("../../include/func_DzuikSurface.jl")
+include("../../include/gen_read_meshes/func_DzuikSurface.jl")
 
 # compiled function for the r.h.s of the PDE
 rhs_func = include("../../include/cfunc_negLBO.jl")

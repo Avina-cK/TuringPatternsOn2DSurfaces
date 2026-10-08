@@ -1,6 +1,6 @@
 using Ferrite, FerriteGmsh, LinearAlgebra
 
-include("../../include/gen_sphere.jl")
+include("../../include/gen_read_meshes/gen_sphere.jl")
 include("../../include/funcs_error_analysis.jl")
 include("surface_cell_values.jl")
 include("func_assembleKF_manual.jl")

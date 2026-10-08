@@ -1,6 +1,6 @@
 include("../../include/funcs_sym.jl")
 include("../../include/func_sym_dt.jl")
-include("../../include/func_DzuikSurface.jl")
+include("../../include/gen_read_meshes/func_DzuikSurface.jl")
 
 function u₁(x,y,z)
     return x*y

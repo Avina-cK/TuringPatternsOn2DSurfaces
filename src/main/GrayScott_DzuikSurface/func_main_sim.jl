@@ -7,28 +7,50 @@ PDE:
 using Ferrite, FerriteGmsh
 using BlockArrays, SparseArrays, LinearAlgebra
 using Random
-using WriteVTK
+#using WriteVTK
+using VTKHDF
 
 include("../../include/surface_cell_values.jl")
 include("../../include/gen_read_meshes/func_load_tri_surfmesh.jl")
 include("../../include/struct_GrayScott.jl")
 
-include("func_assemble_matrices.jl")
-include("func_assemble_initial_cond.jl")
+include("../../include/fem_assembly_funcs/func_assemble_matrices_RDE.jl")
+include("../../include/fem_assembly_funcs/func_assemble_polar_initial_cond.jl")
+include("../../include/fem_assembly_funcs/func_assemble_const_initial_cond.jl")
+
 include("save_load_state.jl")
 
 given_m_default = GrayScottMaterial{Float64}(0.00016, 0.00008, 0.06, 0.062)
 dir_to_meshes_default = "../../Dziuk_surf_meshes"
 
-fts(x) = replace(string(x), "." => "-") #float to string
+function fts(x, n)
+    # Small values: format as *-**e-*
+    if x != 0 && abs(x) < 1.0e-4
+        e = floor(Int, log10(abs(x)))
+        m = round(x / 10.0^e, digits=n)
+        if abs(m) >= 10 # rounding pushed mantissa to 10.0
+            m /= 10
+            e += 1
+        end
+        s = string(m)
+        i = findfirst('.', s)
+        s = rpad(s, i + n, '0')
+        return replace(s, "." => "-") * "e" * string(e)
+    end
+
+    # Old version (if breaks)
+    s = string(round(x, digits=n))
+    i = findfirst('.', s)
+    s = rpad(s, i + n, '0')
+    return replace(s, "." => "-")
+end
 
 function sim_gs_on_Dziukmesh(given_m::GrayScottMaterial{Float64}=given_m_default,
                         refinement::Int=4, Δt::Float64=1.0, T::Float64=50000.0,
                         savesol::Bool=true, no_frames_to_save::Int=100,
                         dir_to_meshes::String=dir_to_meshes_default;
                         restart_from::Union{Nothing,String}=nothing,
-                        init_const=[0.0; 0.0]
-                        
+                        init_const=[0.0; 0.0], noise_amp_given::Float64=0.01
     )
         
     nsteps = ceil(Int, T/Δt) 
@@ -52,7 +74,7 @@ function sim_gs_on_Dziukmesh(given_m::GrayScottMaterial{Float64}=given_m_default
     M = allocate_matrix(dh; coupling=[true false; false true])
     D = allocate_matrix(dh; coupling=[true false; false true])
 
-    assemble_matrices!(M, D, cellvalues_Ω, dh, given_m)
+    assemble_matrices_RDE!(M, D, cellvalues_Ω, dh, given_m)
 
     A = M + Δt .* D
     cholA = cholesky(A)
@@ -70,7 +92,7 @@ function sim_gs_on_Dziukmesh(given_m::GrayScottMaterial{Float64}=given_m_default
         t_start=0.0
         iter_start=0
         if init_const==[0.0; 0.0]
-            setup_initial_conditions!(uₜ₋₁, cellvalues_Ω, dh)
+            setup_polar_initial_conditions!(uₜ₋₁, cellvalues_Ω, dh; noise_amp = noise_amp_given)
         else
             setup_const_init_conditions!(uₜ₋₁, cellvalues_Ω, dh, init_const)
         end
@@ -79,17 +101,24 @@ function sim_gs_on_Dziukmesh(given_m::GrayScottMaterial{Float64}=given_m_default
     ## Save solutions
     if savesol
         cd(@__DIR__)
-        basefolder_name = "GS_Dziuk_surf_$(refinement)_$(fts(Du))_$(fts(Dv))_$(fts(α))_$(fts(β))"
+        basefolder_name = "GS_Dziuk_surf_$(refinement)_$(fts(Du,5))_$(fts(Dv,5))_$(fts(α,3))_$(fts(β,6))"
         mkpath("results/$(basefolder_name)")
         cd("results/$(basefolder_name)/")
         basefile_name = "GS_Dziuk_surf"
-        pvd = paraview_collection("$(basefile_name)"; append=restarted)
+        open(basefolder_name*".txt", "a") do io
+            write(io, "Δt = $(Δt), D_u = $(fts(Du,10)), D_v = $(fts(Dv,10)), alpha = $(fts(α,3)), beta = $(fts(β,6))")
+        end
+        vtkhdf = VTKHDFGridFile("$(basefile_name).vtkhdf", dh; temporal = true)
+        #pvd = paraview_collection("$(basefile_name)"; append=restarted)
 
         if !restarted
-            VTKGridFile("$(basefile_name)-0", dh) do vtk
+            write_timestep(vtkhdf, 0.0) do vtk
                 write_solution(vtk, dh, uₜ₋₁, "_h")
-                pvd[0.0] = vtk
             end
+            #VTKGridFile("$(basefile_name)-0", dh) do vtk
+            #    write_solution(vtk, dh, uₜ₋₁, "_h")
+            #    pvd[0.0] = vtk
+            #end
         end
     end
 
@@ -113,10 +142,13 @@ function sim_gs_on_Dziukmesh(given_m::GrayScottMaterial{Float64}=given_m_default
         end
         iₜ_final, t_final = iₜ, t
         if iₜ_r % save_every == 0
-            VTKGridFile("$(basefile_name)-$(iₜ)", dh) do vtk
+            write_timestep(vtkhdf, t) do vtk
                 write_solution(vtk, dh, uₜ, "_h")
-                pvd[t] = vtk
             end
+            #VTKGridFile("$(basefile_name)-$(iₜ)", dh) do vtk
+            #    write_solution(vtk, dh, uₜ, "_h")
+            #    pvd[t] = vtk
+            #end
             @info "Step $(t)/$(t_start + T)"
         end
         if any(isnan.(uₜ))
@@ -125,16 +157,20 @@ function sim_gs_on_Dziukmesh(given_m::GrayScottMaterial{Float64}=given_m_default
         end
         if isapprox(uₜ, uₜ₋₁; rtol=1e-8, atol=1e-10)
             @info "Converged at step $(iₜ), t = $(t)"
-            VTKGridFile("$(basefile_name)-$(iₜ)", dh) do vtk
+            write_timestep(vtkhdf, t) do vtk
                 write_solution(vtk, dh, uₜ, "_h")
-                pvd[t] = vtk
             end
+            #VTKGridFile("$(basefile_name)-$(iₜ)", dh) do vtk
+            #    write_solution(vtk, dh, uₜ, "_h")
+            #    pvd[t] = vtk
+            #end
             break
         end
         uₜ₋₁ .= uₜ
     end
     if savesol
-        close(pvd)
+        close(vtkhdf)
+        #close(pvd)
         # always persist final state for a future restart, regardless of exit reason
         save_state(uₜ₋₁, t_final, iₜ_final, "$(basefile_name)_state_$(iₜ_final).jld2")
     end

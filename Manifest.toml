@@ -2,7 +2,7 @@
 
 julia_version = "1.12.4"
 manifest_format = "2.0"
-project_hash = "b6bb7bcc604c51d8831a01c0433848542f47f5a8"
+project_hash = "2c9e062a6248906fb8aee8beb9801076c7b12151"
 
 [[deps.ADTypes]]
 deps = ["PrecompileTools"]
@@ -2639,9 +2639,9 @@ version = "0.5.2+0"
 
 [[deps.Roots]]
 deps = ["Accessors", "CommonSolve", "Printf"]
-git-tree-sha1 = "4db094d5e079abbda658acfe1c4d098430417717"
+git-tree-sha1 = "971f04b3780c0da4edf230573fc1aadc2c6e649e"
 uuid = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
-version = "3.0.8"
+version = "3.0.10"
 
     [deps.Roots.extensions]
     RootsChainRulesCoreExt = "ChainRulesCore"
@@ -3204,6 +3204,12 @@ deps = ["InteractiveUtils", "MacroTools", "Preferences"]
 git-tree-sha1 = "ea3e54c2bdde39062abf5a9758a23735558705e1"
 uuid = "781d530d-4396-4725-bb49-402e4bee1e77"
 version = "1.4.0"
+
+[[deps.TuringPatternsOn2DSurfaces]]
+deps = ["BlockArrays", "CSV", "Colors", "DataFrames", "Documenter", "Ferrite", "FerriteGmsh", "GLMakie", "Gmsh", "LDLFactorizations", "LaTeXStrings", "LinearAlgebra", "MeshGrid", "NaNMath", "PkgCite", "Plots", "RuntimeGeneratedFunctions", "Symbolics", "VTKHDF", "VectorFieldPlots"]
+path = "."
+uuid = "30f2feee-2b1f-4256-ac8e-acfb0557714f"
+version = "0.0.0"
 
 [[deps.URIs]]
 git-tree-sha1 = "908fec9df6c5de98548ead82a468c95ccf6cd263"

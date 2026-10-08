@@ -5,7 +5,7 @@ using WriteVTK
 include("surface_cell_values.jl")
 include("../../include/gen_read_meshes/func_load_tri_surfmesh.jl")
 include("../../include/funcs_error_analysis.jl")
-include("../../include_wip/check_mesh.jl")
+#include("../../include_wip/check_mesh.jl")
 
 include("func_assembleKF.jl")
 include("func_assemble_u_true.jl")
@@ -34,7 +34,7 @@ function solve_LB_eq_on_Dzuiksurf(refinement)
 
     cellvalues_Ω = SurfaceCellValues(qr, ip)
 
-    @assert check_normal_orientation(dh, cellvalues_Ω) == [] "Some cells are not oriented correctly. Check your mesh!"
+    #@assert check_normal_orientation(dh, cellvalues_Ω) == [] "Some cells are not oriented correctly. Check your mesh!"
 
     ## Check dofs 
     # for P1 scalar field: 1 DoF per node

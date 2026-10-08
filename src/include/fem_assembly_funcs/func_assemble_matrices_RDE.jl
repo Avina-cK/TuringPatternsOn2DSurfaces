@@ -1,4 +1,4 @@
-function assemble_element_mass!(Me::Matrix, cellvalues)
+function assemble_element_mass_uv!(Me::Matrix, cellvalues)
     n_basefuncs = getnbasefunctions(cellvalues)
     # The mass matrices between the reactions are not coupled, so we get a blocked-strided matrix.
     num_reactants = 2
@@ -24,7 +24,8 @@ function assemble_element_mass!(Me::Matrix, cellvalues)
     end
     return nothing
 end
-function assemble_element_diffusion!(De::Matrix, cellvalues, material::GrayScottMaterial)
+
+function assemble_element_diffusion_uv!(De::Matrix, cellvalues, material)
     n_basefuncs = getnbasefunctions(cellvalues)
     Dᵤ = material.Dᵤ
     Dᵥ = material.Dᵥ
@@ -52,7 +53,7 @@ function assemble_element_diffusion!(De::Matrix, cellvalues, material::GrayScott
     end
     return nothing
 end
-function assemble_matrices!(M::SparseMatrixCSC, D::SparseMatrixCSC, cellvalues, dh::DofHandler, material::GrayScottMaterial)
+function assemble_matrices_RDE!(M::SparseMatrixCSC, D::SparseMatrixCSC, cellvalues, dh::DofHandler, material)
     n_basefuncs = getnbasefunctions(cellvalues)
     # Allocate the element stiffness matrix and element force vector
     Me = zeros(2 * n_basefuncs, 2 * n_basefuncs)
@@ -67,9 +68,9 @@ function assemble_matrices!(M::SparseMatrixCSC, D::SparseMatrixCSC, cellvalues, 
         fill!(Me, 0)
         fill!(De, 0)
         # Compute element contribution
-        assemble_element_mass!(Me, cellvalues)
+        assemble_element_mass_uv!(Me, cellvalues)
         assemble!(M_assembler, celldofs(cell), Me)
-        assemble_element_diffusion!(De, cellvalues, material)
+        assemble_element_diffusion_uv!(De, cellvalues, material)
         assemble!(D_assembler, celldofs(cell), De)
     end
     return nothing

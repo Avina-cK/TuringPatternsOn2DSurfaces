@@ -10,7 +10,7 @@ using Ferrite
 using SparseArrays
 using Random
 using WriteVTK
-include("../include/funcs_error_analysis.jl")
+include("../../include/funcs_error_analysis.jl")
 
 k = 1.0e-3
 Δt = 0.1

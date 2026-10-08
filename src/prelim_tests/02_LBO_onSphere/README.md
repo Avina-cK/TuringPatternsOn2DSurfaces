@@ -3,7 +3,7 @@ This folder aims to solve the stationary problem
 ```math
 -\Delta_{S}u = f \quad \mathrm{on} \quad \Omega_{h}
 ```
-where $\Omega_{h}$ is a mesh of a unit sphere with great edge length, $h$. 
+where $\Omega_{h}$ is a mesh of a unit sphere with greatest edge length, $h$. 
 
 A manufactured solution,
 ```math

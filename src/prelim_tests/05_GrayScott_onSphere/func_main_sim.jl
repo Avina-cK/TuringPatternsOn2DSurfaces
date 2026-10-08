@@ -12,10 +12,8 @@ using WriteVTK
 include("../../include/surface_cell_values.jl")
 include("../../include/gen_read_meshes/gen_sphere.jl")
 include("../../include/struct_GrayScott.jl")
-
-include("func_assemble_matrices.jl")
-include("func_assemble_initial_cond.jl")
-
+include("../../include/fem_assembly_funcs/func_assemble_matrices_RDE.jl")
+include("../../include/fem_assembly_funcs/func_assemble_polar_initial_cond.jl")
 
 given_m_default = GrayScottMaterial{Float64}(0.00016, 0.00008, 0.06, 0.062)
 dir_to_sphere_meshes_default = "../../sphere_meshes/"
@@ -51,7 +49,7 @@ function sim_gs_on_sphere(given_m::GrayScottMaterial{Float64}=given_m_default,
     M = allocate_matrix(dh; coupling=[true false; false true])
     D = allocate_matrix(dh; coupling=[true false; false true])
 
-    assemble_matrices!(M, D, cellvalues_Ω, dh, given_m)
+    assemble_matrices_RDE!(M, D, cellvalues_Ω, dh, given_m)
 
     A = M + Δt .* D
     cholA = cholesky(A)
@@ -59,7 +57,7 @@ function sim_gs_on_sphere(given_m::GrayScottMaterial{Float64}=given_m_default,
     ## initial condition
     uₜ = zeros(ndofs(dh))
     uₜ₋₁ = zeros(ndofs(dh))
-    setup_initial_conditions!(uₜ₋₁, cellvalues_Ω, dh)
+    setup_polar_initial_conditions!(uₜ₋₁, cellvalues_Ω, dh)
 
     ## Save solutions
     if savesol
@@ -114,8 +112,3 @@ function sim_gs_on_sphere(given_m::GrayScottMaterial{Float64}=given_m_default,
     @info "Parameters: Du=$(Du), Dv=$(Dv), α=$(α), β=$(β)"
     cd(@__DIR__)
 end
-
-
-given_m_2 = GrayScottMaterial{Float64}(0.00016, 0.00008, 0.064, 0.062)
-
-sim_gs_on_sphere(given_m_2)

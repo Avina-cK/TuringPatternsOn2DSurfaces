@@ -17,6 +17,7 @@ src/Dziuk_surf_meshes/Dzuik_mesh_8.msh
 src/Dziuk_surf_meshes/Dzuik_mesh_9.msh
 src/Dziuk_surf_meshes/Dzuik_mesh_10.msh
 src/Dziuk_surf_meshes/Dzuik_mesh_11.msh
+src/blood_cell_meshes/
 src/prelim_tests/02_LBO_onSphere/results/result_sphere_1_u_err.png
 src/prelim_tests/02_LBO_onSphere/results/result_sphere_1_u_h.png
 src/prelim_tests/02_LBO_onSphere/results/result_sphere_1_u_true.png
