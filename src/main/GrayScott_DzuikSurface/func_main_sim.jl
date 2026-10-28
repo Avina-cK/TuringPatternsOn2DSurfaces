@@ -10,6 +10,7 @@ using Random
 #using WriteVTK
 using VTKHDF
 
+include("../../include/func_floattostring.jl")
 include("../../include/surface_cell_values.jl")
 include("../../include/gen_read_meshes/func_load_tri_surfmesh.jl")
 include("../../include/struct_GrayScott.jl")
@@ -22,28 +23,6 @@ include("save_load_state.jl")
 
 given_m_default = GrayScottMaterial{Float64}(0.00016, 0.00008, 0.06, 0.062)
 dir_to_meshes_default = "../../Dziuk_surf_meshes"
-
-function fts(x, n)
-    # Small values: format as *-**e-*
-    if x != 0 && abs(x) < 1.0e-4
-        e = floor(Int, log10(abs(x)))
-        m = round(x / 10.0^e, digits=n)
-        if abs(m) >= 10 # rounding pushed mantissa to 10.0
-            m /= 10
-            e += 1
-        end
-        s = string(m)
-        i = findfirst('.', s)
-        s = rpad(s, i + n, '0')
-        return replace(s, "." => "-") * "e" * string(e)
-    end
-
-    # Old version (if breaks)
-    s = string(round(x, digits=n))
-    i = findfirst('.', s)
-    s = rpad(s, i + n, '0')
-    return replace(s, "." => "-")
-end
 
 function sim_gs_on_Dziukmesh(given_m::GrayScottMaterial{Float64}=given_m_default,
                         refinement::Int=4, Δt::Float64=1.0, T::Float64=50000.0,
@@ -101,12 +80,12 @@ function sim_gs_on_Dziukmesh(given_m::GrayScottMaterial{Float64}=given_m_default
     ## Save solutions
     if savesol
         cd(@__DIR__)
-        basefolder_name = "GS_Dziuk_surf_$(refinement)_$(fts(Du,5))_$(fts(Dv,5))_$(fts(α,3))_$(fts(β,6))"
+        basefolder_name = "GS_Dziuk_surf_$(refinement)_$(fts(Du,5))_$(fts(Dv,1))_$(fts(α,3))_$(fts(β,6))"
         mkpath("results/$(basefolder_name)")
         cd("results/$(basefolder_name)/")
         basefile_name = "GS_Dziuk_surf"
         open(basefolder_name*".txt", "a") do io
-            write(io, "Δt = $(Δt), D_u = $(fts(Du,10)), D_v = $(fts(Dv,10)), alpha = $(fts(α,3)), beta = $(fts(β,6))")
+            write(io, "h=$(h), Δt = $(Δt), D_u = $(fts(Du,10)), D_v = $(fts(Dv,10)), alpha = $(fts(α,3)), beta = $(fts(β,6))")
         end
         vtkhdf = VTKHDFGridFile("$(basefile_name).vtkhdf", dh; temporal = true)
         #pvd = paraview_collection("$(basefile_name)"; append=restarted)
